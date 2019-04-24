@@ -35,4 +35,4 @@ fodge: $(IMPFILES) $(EXTFILES)
 .PHONY: clean
 
 clean:
-	rm $(prog) $(ODIR)/*.o $(ODIR)/*.o.d
+	rm -f $(PROG) $(ODIR)/*.o $(ODIR)/*.o.d

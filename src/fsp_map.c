@@ -137,7 +137,8 @@ size_t get_count(const fsp_map* map,
 /**
  * Recursive auxiliary to print_fsp_map.
  */
-void _print_fsp_map(const fsp_map* map, const char* idx_label, int full_detail,
+void _print_fsp_map(const fsp_map* map, const char* idx_label, 
+	int full_detail,
         char* str, int len, size_t offs){
     
     if(map->n_child && offs > 1){
@@ -157,7 +158,7 @@ void _print_fsp_map(const fsp_map* map, const char* idx_label, int full_detail,
         str[offs + fsp_width] = ' ';
         str[len - 1] = '}';
         
-        _print_fsp_map(map->children[fsp], full_detail,
+        _print_fsp_map(map->children[fsp], idx_label, full_detail,
                 str, len, offs + fsp_width);
         
         sprintf(str + offs, "%*s", fsp_width, " ");
