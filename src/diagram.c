@@ -537,7 +537,7 @@ void count_diagrams(const diagram* list, int count_detail){
     else{
         printf("\nO(p^%zd) %zd-point diagrams (grand total: %zd)\n", 
                 OP(list->order), list->ngons, tot);
-        print_fsp_map(map, count_detail > 1);
+        print_fsp_map(map, "sym", count_detail > 1);
         delete_fsp_map(map);    
     }
 }

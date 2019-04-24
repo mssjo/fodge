@@ -30,7 +30,7 @@ $(IMPFILES) $(EXTFILES): $(patsubst $(ODIR)/%.o,%.c,$@)
 	$(CC) -c -o $@ $(patsubst $(ODIR)/%.o,%.c,$@) $(CFLAGS) -MMD -MP -MF "$@.d"
 
 fodge: $(IMPFILES) $(EXTFILES)
-	$(CC) -o $(PROG) $^ $(CFLAGS)
+	$(CC) -o $(PROG) $^ $(CFLAGS) -lm
 
 .PHONY: clean
 

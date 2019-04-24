@@ -137,7 +137,7 @@ size_t get_count(const fsp_map* map,
 /**
  * Recursive auxiliary to print_fsp_map.
  */
-void _print_fsp_map(const fsp_map* map, int full_detail,
+void _print_fsp_map(const fsp_map* map, const char* idx_label, int full_detail,
         char* str, int len, size_t offs){
     
     if(map->n_child && offs > 1){
@@ -176,8 +176,9 @@ void _print_fsp_map(const fsp_map* map, int full_detail,
             if(!map->counts[idx])
                 continue;
 
-            printf("  %*s   %7zd: %7zd\n", 
-                    len, " ", 
+            printf("  %*s   %6s %zd: %7zd\n", 
+                    len, " ",
+		    idx_label,
                     idx, 
                     map->counts[idx]);
         }
@@ -189,12 +190,15 @@ void _print_fsp_map(const fsp_map* map, int full_detail,
  * are printed.
  * 
  * @param map           The map.
+ * @param idx_label	The label to print in front of each index in the map,
+ *                      like "idx_label idx: count". Not used if full_detail
+ *                      is FALSE.
  * @param full_detail   If TRUE, all entries are printed. If FALSE, only the
  *                      total of all counts mapped to each flavour split is
  *                      printed, rather than distributing them across their
  *                      indices.
  */
-void print_fsp_map(const fsp_map* map, int full_detail){
+void print_fsp_map(const fsp_map* map, const char* idx_label, int full_detail){
     if(!map)
         return;
     
@@ -202,7 +206,7 @@ void print_fsp_map(const fsp_map* map, int full_detail){
     char* str = malloc(len + 2);
     sprintf(str, "{%*s}", len - 2, " ");
        
-    _print_fsp_map(map, full_detail, str, len, 1);
+    _print_fsp_map(map, idx_label, full_detail, str, len, 1);
     
     free(str);
     

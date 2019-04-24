@@ -31,7 +31,7 @@ extern "C" {
     size_t get_count(const fsp_map* map, 
             const size_t* fsp, size_t n_fsp, size_t idx);
     
-    void print_fsp_map(const fsp_map* map, int full_detail);
+    void print_fsp_map(const fsp_map* map, const char* idx_label, int full_detail);
     void delete_fsp_map(fsp_map* map);
 
 #ifdef	__cplusplus

@@ -1,5 +1,6 @@
 
 #include "point.h"
+#include <math.h>
 
 /**
  * Creates an instance of the origin.
