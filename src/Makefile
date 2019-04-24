@@ -7,29 +7,32 @@ CFLAGS = -Wall -Werror -Wextra -std=c99 -I$(IDIR)
 ODIR = obj
 
 # Files that directly implement a .h file
-IMPFILES = $(pathsubst %,$(ODIR),cycrep.o diagram_table.o fodge_FORM.o fodge_TikZ.o fodge_util.o fsp_map.o info_sort.o point.o)
+IMPFILES =  $(ODIR)/cycrep.o $(ODIR)/diagram_table.o $(ODIR)/fodge_FORM.o $(ODIR)/fodge_TikZ.o $(ODIR)/fodge_util.o $(ODIR)/fsp_map.o $(ODIR)/info_sort.o $(ODIR)/point.o
 # Additional files with no .h counterpart
-EXTFILES = $(pathsubst %,$(ODIR),diagram.o polygon.o represent.o fodge_main.o)
+EXTFILES = $(ODIR)/diagram.o $(ODIR)/polygon.o $(ODIR)/represent.o $(ODIR)/fodge_main.o
 
 OBJFILES = $(IMPFILES) $(EXTFILES)
 
 # Standard dependencies
-$(IMPFILES) : $(subst .o,.h,$@)
-$(OBJFILES) : fodge.h fodge_util.h cycrep.h
+$(IMPFILES) : $(patsubst $(ODIR)/%.o,$(IDIR)/%.h,$@)
+$(OBJFILES) : $(IDIR)/fodge.h $(IDIR)/fodge_util.h $(IDIR)/cycrep.h
 
 # Additional dependencies
-fodge_main.o : fodge_TikZ.h fodge_FORM.h
-diagram.o fodge_FORM.o: fsp_map.h
-fodge_TikZ.o : point.h
-cycrep.o : info_sort.h
+$(ODIR)/fodge_main.o : $(IDIR)/fodge_TikZ.h $(IDIR)/fodge_FORM.h
+$(ODIR)/diagram.o    : $(IDIR)/fsp_map.h
+$(ODIR)/fodge_FORM.o : $(IDIR)/fsp_map.h
+$(ODIR)/fodge_TikZ.o : $(IDIR)/point.h
+$(ODIR)/cycrep.o     : $(IDIR)/info_sort.h
 
-$(ODIR)/%.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-	
-$(PROG): $(OBJFILES)
-	$(CC) -o $@ $^ $(CFLAGS)
+$(IMPFILES) $(EXTFILES): $(patsubst $(ODIR)/%.o,%.c,$@)
+	mkdir -p $(ODIR)
+	rm -f "$@.d"
+	$(CC) -c -o $@ $(patsubst $(ODIR)/%.o,%.c,$@) $(CFLAGS) -MMD -MP -MF "$@.d"
+
+fodge: $(IMPFILES) $(EXTFILES)
+	$(CC) -o $(PROG) $^ $(CFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm $(prog) $(ODIR)/*.o
+	rm $(prog) $(ODIR)/*.o $(ODIR)/*.o.d

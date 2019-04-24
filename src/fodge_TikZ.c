@@ -29,6 +29,7 @@ void _TikZ_diagram_poly(FILE* tex, diagram* diagr, point** gon_pts){
 
 #define VERTEX_RADIUS       .05
 #define LEG_MARGIN          2*VERTEX_RADIUS
+#define PI		    3.14159265358979323846
 void _TikZ_diagram_feyn(FILE* tex, diagram* diagr, 
         point** gon_pts, point** edge_pts){
     
@@ -104,14 +105,14 @@ void TikZ_diagrams(FILE* tex, diagram* diagr, enum draw_mode mode,
     
     point** gon_pts = salloc(diagr->ngons * sizeof(point*));
     for(size_t i = 0; i < diagr->ngons; i++)
-        gon_pts[i] = polar_point(radius, (2*M_PI*i)/diagr->ngons);
+        gon_pts[i] = polar_point(radius, (2*PI*i)/diagr->ngons);
     
     point** edge_pts = NULL;
     if(mode & DRAW_FEYNMAN){
         edge_pts = salloc(diagr->ngons * sizeof(point*));
-        double feyn_rad = radius * cos(M_PI/diagr->ngons) + LEG_MARGIN;
+        double feyn_rad = radius * cos(PI/diagr->ngons) + LEG_MARGIN;
         for(size_t i = 0; i < diagr->ngons; i++)
-            edge_pts[i] = polar_point(feyn_rad, 2*M_PI*(i+.5)/diagr->ngons);
+            edge_pts[i] = polar_point(feyn_rad, 2*PI*(i+.5)/diagr->ngons);
     }
         
     fprintf(tex, "\\begin{center}\n");
