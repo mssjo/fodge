@@ -1,3 +1,5 @@
+PROG = ../fodge
+
 IDIR = ../include
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra -std=c99 -I$(IDIR)
@@ -13,21 +15,21 @@ OBJFILES = $(IMPFILES) $(EXTFILES)
 
 # Standard dependencies
 $(IMPFILES) : $(subst .o,.h,$@)
-$(OBJFILES) : fodge.h fodge_util.h
+$(OBJFILES) : fodge.h fodge_util.h cycrep.h
 
 # Additional dependencies
-represent.o : cycrep.h
 fodge_main.o : fodge_TikZ.h fodge_FORM.h
-diagram.o : fsp_map.h
-fodge_TikZ.h : point.h
+diagram.o fodge_FORM.o: fsp_map.h
+fodge_TikZ.o : point.h
+cycrep.o : info_sort.h
 
 $(ODIR)/%.o: %.c
-	$(CC) -c -c $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 	
-fodgemake: $(OBJFILES)
+$(PROG): $(OBJFILES)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm $(ODIR)/*.o
+	rm $(prog) $(ODIR)/*.o
