@@ -25,7 +25,7 @@ int _compare_rep(const void* a, const void* b){
  * comparison and symmetry properties.
  * 
  * @param diagr     the diagram.
- * @return  a comprep representing the diagram.
+ * @return  a comprep representingx  the diagram.
  */
 comprep* represent_diagram(const diagram* diagr){
 
@@ -34,6 +34,7 @@ comprep* represent_diagram(const diagram* diagr){
     crep->nreps  = 0;
     crep->reps   = salloc(diagr->npolys * sizeof(cycrep*));
     crep->poly_reps = scalloc(diagr->npolys, sizeof(cycrep*));
+    
     
     /* Traverses all polygons and calls represent_part to represent the flavour
      * parts of the diagram. Since represent_part traverses exactly those 

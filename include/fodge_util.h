@@ -39,9 +39,15 @@ extern "C" {
     /* Goes from order label to actual momentum order: 
      * 0 -> 2, 1 -> 4, 2 -> 6, ... */
 #define OP(n) (2*((n)+1))
+    /* The inverse of OP(n) */
+#define INV_OP(n) ((n)/2 - 1)
     
     /* Swaps two values */
 #define SWAP(x,y,t) (t) = (x); (x) = (y); (y) = (t);
+    /* Maximum function, picks first argument in case of equality */
+#define MAX(a,b) (a)>=(b)?(a):(b)
+    /* Minimum function, picks first argument in case of equality */
+#define MIN(a,b) (a)<=(b)?(a):(b)
     
     /** Shorthand for unsigned integers  */
     typedef unsigned int uint;

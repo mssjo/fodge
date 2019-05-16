@@ -133,11 +133,14 @@ int fodge_FORM(const char* filename, const diagram* diagr){
     if(!diagr)
         return 0;
     
-    size_t name_len = strlen(filename);
+    size_t name_len = strlen(filename)
+        + decimal_width(diagr->ngons) 
+        + decimal_width(OP(diagr->order))
+        + strlen("_p");
     FILE* form;
     
     char* name = salloc(name_len + strlen("_diagr.hf") + 1);
-    sprintf(name, "%s", filename);
+    sprintf(name, "%s_%zdp%zd", filename, diagr->ngons, OP(diagr->order));
     
     sprintf(name + name_len, "_diagr.hf");
     printf("FORMing O(p^%zd) %zd-point diagrams > %s ...", 

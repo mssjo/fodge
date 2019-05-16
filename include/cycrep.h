@@ -157,7 +157,7 @@ extern "C" {
     void print_comprep(const comprep* crep, const diagram* diagr);
 
     void delete_comprep(comprep* crep);
-
+    
 #ifdef	__cplusplus
 }
 #endif

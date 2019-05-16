@@ -77,8 +77,8 @@ size_t _booth_normalise(const cycrep* rep, rep_level level){
  *              been visited!
  * @return  the period at this level
  */
-size_t _find_period(const cycrep* rep, rep_level level){
-    size_t limit = rep->period ? rep->period : rep->length;
+size_t _find_period(const cycrep* rep, rep_level level, 
+        int** forfeit_comp, size_t* p_idx_map){
     size_t step  = rep->period ? rep->period : 1;
     
     int comp;
@@ -90,8 +90,7 @@ size_t _find_period(const cycrep* rep, rep_level level){
         if(rep->length % period)
             continue;
         
-        /* anti_doublecount activated to prevent symmetry excess */
-        comp = compare_self(rep, 0, period, limit, level, TRUE);
+        comp = compare_self(rep, 0, period, level, forfeit_comp, p_idx_map);
         if(comp == 0)
             return period;
     }
@@ -100,18 +99,17 @@ size_t _find_period(const cycrep* rep, rep_level level){
 }
 
 /**
- * Normalises a cycrep by determining its period and offset.
+ * Normalises a cycrep by determining its offset.
  * 
  * @param rep   the cycrep - its contents will be updated by this method
  * @param level the level to look at - all previous levels must already have
  *              been visited!
  */
-void normalise_cycrep(cycrep* rep, rep_level level){
+void normalise_cycrep(cycrep* rep, rep_level level, size_t* p_idx_map){
     if(!rep)
         return;
     
     rep->offset = _booth_normalise(rep, level);
-    rep->period = _find_period    (rep, level);
 }
 
 #define ARROFFS(r,i)    r->array[(i + r->offset) % r->length]
@@ -209,11 +207,12 @@ int compare_cycrep(const cycrep* rep_1, const cycrep* rep_2,
  *          positive value if the first is greater than the second, or 0 if 
  *          they are equal.
  */
-int compare_self(const cycrep* rep, size_t idx_1, size_t idx_2, 
-        size_t seg_length, rep_level level, int anti_doublecount){
+int compare_self(const cycrep* rep, size_t idx_1, size_t idx_2, rep_level level, 
+        int** forfeit_comp, size_t* p_idx_map){
     
     int comp;
-    for(size_t i = 0; i < seg_length; i++){
+    size_t p_1, p_2;
+    for(size_t i = 0; i < (rep->length - (idx_1 - idx_2)); i++){
         comp = COMPARE(
                 ARROFFS(rep, i+idx_1).nlines, 
                 ARROFFS(rep, i+idx_2).nlines);
@@ -236,16 +235,23 @@ int compare_self(const cycrep* rep, size_t idx_1, size_t idx_2,
                     return comp;
             }
             if(level & FSP_LEVEL){
-                if(anti_doublecount){
-                    comp = COMPARE(
-                            (size_t) ARROFFS(rep, i+idx_1).lines[j].con, 
-                            (size_t) ARROFFS(rep, i+idx_2).lines[j].con);
+                if(forfeit_comp && p_idx_map){
+                    p_1 = p_idx_map[
+                            ARROFFS(rep, i+idx_1).lines[j].p_idx_in_diagr];
+                    p_2 = p_idx_map[
+                            ARROFFS(rep, i+idx_2).lines[j].p_idx_in_diagr];
+                    
+                    if(forfeit_comp[MIN(p_1,p_2)][MAX(p_1,p_2)])
+                        return +1;
                 }
-                else{
-                    comp = compare_comprep(
-                            ARROFFS(rep, i+idx_1).lines[j].con, 
-                            ARROFFS(rep, i+idx_2).lines[j].con);
-                }
+                
+                comp = compare_comprep(
+                        ARROFFS(rep, i+idx_1).lines[j].con, 
+                        ARROFFS(rep, i+idx_2).lines[j].con);
+                
+                if(!comp && forfeit_comp && p_idx_map)
+                    forfeit_comp[MIN(p_1,p_2)][MAX(p_1,p_2)] = TRUE;
+                
                 if(comp)
                     return comp;
             }
@@ -341,19 +347,42 @@ void delete_cycrep(cycrep* rep){
  * Computes the full symmetry factor of a diagram from its cycrep. The symmetry
  * factor is the ratio between the total number of forms of the representation
  * and the number of inequivalent forms.
- * @param crep      a comprep cycrep
+ * @param crep      a compound cycrep
  * @param length    the ngons of the corresponding diagram
  * @return  the symmetry factor.
  */
-size_t get_symmetry(const comprep* crep){
+size_t get_symmetry(const diagram* diagr){
     int sym = 1;
-        
     size_t eq_fact = 1;
+    
+    comprep* crep = diagr->rep;
+    cycrep* rep;
+    
+    int** forfeit_comp = salloc(crep->nreps * sizeof(int*));
+    size_t* p_idx_map = salloc(diagr->npolys * sizeof(size_t));
+        
+    for(size_t i = 0; i < crep->nreps; i++){
+        forfeit_comp[i] = scalloc(crep->nreps, sizeof(int*));
+        
+        rep = crep->reps[i];
+        for(size_t j = 0; j < rep->length; j++){
+            for(size_t k = 0; k < rep->array[j]->nlines; k++){
+                p_idx_map[rep->array[j]->lines[k].p_idx_in_diagr] = i;
+            }
+        }
+    }
+    
     for(size_t i = 0, eq_idx = 0; i < crep->nreps; i++){
+        rep = crep->reps[i];
+        
         /* If this equality does not hold, there are singlets that break the
          * cyclic symmetry. */
-        if(crep->reps[i]->length == crep->reps[i]->n_flavidx)        
+        if(rep->length == crep->reps[i]->n_flavidx){ 
+            rep->period = _find_period(rep, ALL_LEVELS, forfeit_comp, p_idx_map);
             sym *= crep->reps[i]->length / crep->reps[i]->period;
+        }
+        else
+            rep->period = rep->n_flavidx;
         
         if(crep->eq_reps[eq_idx] == crep->eq_reps[i])
             eq_fact *= 1 + i - eq_idx;
@@ -363,6 +392,21 @@ size_t get_symmetry(const comprep* crep){
             eq_fact = 1;
         }
     }
+    
+    size_t next_eq_idx = crep->eq_reps[crep->nreps - 1] + 1;
+    for(size_t i = 0; i < crep->nreps; i++){
+        for(size_t j = i+1; j < crep->nreps; j++){
+            if(forfeit_comp[i][j]){
+                crep->eq_reps[j] = next_eq_idx;
+                next_eq_idx++;
+            }
+        }
+        
+        free(forfeit_comp[i]);
+    }
+    
+    free(forfeit_comp);
+    free(p_idx_map);
         
     return sym * eq_fact;
 }
