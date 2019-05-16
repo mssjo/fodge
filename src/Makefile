@@ -1,3 +1,5 @@
+# To be called in fodge/src
+
 PROG = ../fodge
 
 IDIR = ../include

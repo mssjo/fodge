@@ -284,7 +284,7 @@ size_t _count_vertex(fsp_map** vert_list, fsp_map** main_vert_list,
 void _FORM_propagator(FILE* form, size_t* momenta, 
         size_t max_f_idx, size_t depth, int is_singlet){
     
-    fprintf(form, is_singlet ? "singlet(" : "propagator(");
+    fprintf(form, is_singlet ? "singlet(" : "prop(");
     
     size_t f_idx;
     
@@ -597,13 +597,23 @@ void _FORM_vertices(FILE* form, const fsp_map* vert_list,
     
     if(!vert_list)
         return;
+
+    int already_unsplit = FALSE;
     
     if(vert_list->n_count){
         /* Sets up the correct splittings, not needed if vertex is unsplit */
-        fprintf(form, "\n#redefine SPLIT \"split(%zd", fsp_list[0]);
-        for(size_t i = 1; i < depth; i++)
-            fprintf(form, ",%zd", fsp_list[i]);
-        fprintf(form, ")\"\n");
+        if(already_unsplit){}
+        else if(depth < 1){
+	    fprintf(form, "\n#redefine SPLIT \"unsplit\"\n");
+	    already_unsplit = TRUE;
+	}
+	else {
+	    fprintf(form, "\n#redefine SPLIT \"split(%zd", fsp_list[0]);
+            for(size_t i = 1; i < depth; i++)
+                fprintf(form, ",%zd", fsp_list[i]);
+            fprintf(form, ")\"\n");
+	    already_unsplit = FALSE;
+        }
         
         /* Prints all vertices with this splitting */
         for(size_t ord = 0; ord < vert_list->n_count; ord++){
@@ -617,7 +627,8 @@ void _FORM_vertices(FILE* form, const fsp_map* vert_list,
     
     if(vert_list->n_child){
         /* Edits the flavour splitting as needed and recurses */
-        for(size_t fsp = vert_list->n_child - 1; fsp < vert_list->n_child; fsp++){
+        /* Iteration is done backwards for more natural ordering */
+        for(size_t fsp = vert_list->n_child - 1; fsp < vert_list->n_child; fsp--){
             if(!vert_list->children[fsp])
                 continue;
                 
