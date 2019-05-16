@@ -83,8 +83,15 @@ int main(int argc, char** argv) {
         }
         else if(argv[i][0] >= '0' && argv[i][0] <= '9'){
             argn++;
-            if(argn == 1)
+            if(argn == 1){
                 max_order = (size_t) atoi(argv[i]);
+                if(max_order % 2 || max_order < 2){
+                    printf("Invalid momentum order - "
+                            "only positive even orders allowed!");
+                    exit(EXIT_FAILURE);
+                }
+                max_order = INV_OP(max_order);
+            }
             else if(argn == 2)
                 max_ngons = (size_t) atoi(argv[i]);
             else{
