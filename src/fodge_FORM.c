@@ -628,7 +628,7 @@ void _FORM_vertices(FILE* form, const fsp_map* vert_list,
     if(vert_list->n_child){
         /* Edits the flavour splitting as needed and recurses */
         /* Iteration is done backwards for more natural ordering */
-        for(size_t fsp = vert_list->n_child - 1; fsp < vert_list->n_child; fsp--){
+        for(size_t fsp = vert_list->n_child - 1; fsp+1 > 0; fsp--){
             if(!vert_list->children[fsp])
                 continue;
                 
