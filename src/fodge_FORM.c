@@ -298,6 +298,8 @@ void _FORM_propagator(FILE* form, size_t* momenta,
             n_mom++;
     }
     int inv_mom = (n_mom > max_f_idx / 2);
+	if(inv_mom)
+		fprintf(form, "-(");
     
     for(f_idx = 1; inv_mom != (momenta[f_idx-1] < depth); f_idx++);
     fprintf(form, "p%zd", f_idx);
@@ -305,11 +307,11 @@ void _FORM_propagator(FILE* form, size_t* momenta,
     for(f_idx++; f_idx <= max_f_idx; f_idx++){
         if(inv_mom != (momenta[f_idx-1] >= depth))
             fprintf(form, "+p%zd", f_idx);
-	if(momenta[f_idx-1] >= depth)
+	    if(momenta[f_idx-1] >= depth)
             momenta[f_idx-1] = depth - 1;
         
     }
-    fprintf(form, ")");
+    fprintf(form, inv_mom ? "))" : ")");
 }
 
 /**
