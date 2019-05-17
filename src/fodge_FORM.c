@@ -288,11 +288,22 @@ void _FORM_propagator(FILE* form, size_t* momenta,
     
     size_t f_idx;
     
-    for(f_idx = 1; momenta[f_idx-1] < depth; f_idx++);
+    /* If more than half the momenta are included in the propagator,
+     * use the complementary half (by COM) to reduce computation time
+     * (result in Mandelstams is unchanged, but many momenta take longer
+     * to simplify) */
+    size_t n_mom = 0;
+    for(f_idx = 1; f_idx <= max_f_idx; f_idx++){
+        if(momenta[f_idx-1] >= depth)
+            n_mom++;
+    }
+    int inv_mom = (n_mom > max_f_idx / 2);
+    
+    for(f_idx = 1; inv_mom != (momenta[f_idx-1] < depth); f_idx++);
     fprintf(form, "p%zd", f_idx);
     momenta[f_idx-1] = depth-1;
     for(f_idx++; f_idx <= max_f_idx; f_idx++){
-        if(momenta[f_idx-1] >= depth){
+        if(inv_mom != (momenta[f_idx-1] >= depth)){
             fprintf(form, "+p%zd", f_idx);
             momenta[f_idx-1] = depth - 1;
         }
