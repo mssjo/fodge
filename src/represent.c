@@ -10,13 +10,14 @@
 
 /** Comparison function for use with infosort.  */
 int _compare_con(const void* a, const void* b){
-    return compare_comprep(*((const comprep**) a), *((const comprep**) b));
+    return compare_comprep(*((const comprep**) a), *((const comprep**) b), 
+            NULL);
 }
 
 /** Comparison function for use with infosort. */
 int _compare_rep(const void* a, const void* b){
     return compare_cycrep(*((const cycrep**) a), *((const cycrep**) b), 
-            ALL_LEVELS);
+            ALL_LEVELS, NULL);
 }
 
 /**
@@ -105,12 +106,7 @@ cycrep* represent_part(const diagram* diagr, cycrep** poly_reps, size_t p_idx,
     normalise_cycrep(part, TOP_LEVEL);
     normalise_cycrep(part, ORD_LEVEL);
     normalise_cycrep(part, FSP_LEVEL);
-    
-    if(part->period == 0){
-        printf("Representation failed!\n");
-        exit(EXIT_FAILURE);
-    }
-        
+            
     return part;
 }
 
@@ -235,7 +231,7 @@ comprep* represent_fsp_con(const diagram* diagr, size_t p_idx, int* master){
         
         switch(poly->edges[g_idx].type){    
             case FLSPLIT:
-                /* Crosses flavour splits just like propagators normally are */
+                /* Crosses flavour splits */
                 gon = poly->gons[g_idx];
                 p_idx = poly->edges[g_idx].idx;
                 poly = diagr->polys[p_idx];
@@ -247,6 +243,8 @@ comprep* represent_fsp_con(const diagram* diagr, size_t p_idx, int* master){
             case PROPGTR:
             case SINGLET:
             case EXT_LEG:
+                /* Walks along all other edge types */
+                
                 g_idx = (g_idx + 1) % poly->ngons;
                 break;
             

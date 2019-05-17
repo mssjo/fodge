@@ -16,7 +16,7 @@
  * 
  */
 int main(int argc, char** argv) {
-    
+        
     int include_singlets = TRUE;
     int include_flsplits = TRUE;
     
@@ -129,6 +129,8 @@ int main(int argc, char** argv) {
         char* texname = salloc(strlen(filename) + 5);
         sprintf(texname, "%s.tex", filename);
         FILE* tex = fopen(texname, "w");
+                
+        printf("TikZing diagrams > %s ...", texname);
         TikZ_table(tex, table, DRAW_POLYGON , .4, .05);
         fclose(tex);
         free(texname);

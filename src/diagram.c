@@ -428,7 +428,7 @@ int compare_diagrams(diagram* diagr_1, diagram* diagr_2){
     if(comp)
         return comp;
     
-    return compare_comprep(diagr_1->rep, diagr_2->rep);
+    return compare_comprep(diagr_1->rep, diagr_2->rep, NULL);
 }
 
 diagram* insert_diagram(diagram* list, diagram* diagr){

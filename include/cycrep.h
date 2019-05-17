@@ -96,15 +96,25 @@ extern "C" {
         /** The length of fsp_cons. */
         size_t n_cons;
     } cycrep;
+    
+    /* Struct used to implement "trace equivalences used to enable symmetry
+     * shall not be used for any other symmetry" - records comparisons that
+     * become forfeit when used for symmetry purposes. */
+    struct forfeit_comp {
+        int** forfeit;
+        size_t* p_idx_map;
+        size_t forfeit_len;
+    };
         
     cycrep* copy_cycrep(const cycrep* orig);
     
     void normalise_cycrep(cycrep* rep, rep_level level);
        
     int compare_cycrep(const cycrep* rep_1, const cycrep* rep_2, 
-            rep_level level);
-    int compare_self(const cycrep* rep, size_t idx_1, size_t idx_2, 
-            size_t limit, rep_level level, int anti_doublecount);
+            rep_level level, struct forfeit_comp* fcmp);
+    int compare_self(const cycrep* rep, 
+            size_t idx_1, size_t idx_2, size_t seg_length, 
+            rep_level level, struct forfeit_comp* fcmp);
     
     void print_cycrep(const cycrep* rep, const diagram* diagr);
     
@@ -151,12 +161,13 @@ extern "C" {
     
     size_t get_symmetry(const diagram* diagr);
     
-    int compare_comprep(const comprep* crep_1, 
-            const comprep* crep_2);
+    int compare_comprep(const comprep* crep_1, const comprep* crep_2,
+            struct forfeit_comp* fcmp);
     
     void print_comprep(const comprep* crep, const diagram* diagr);
 
     void delete_comprep(comprep* crep);
+    
     
 #ifdef	__cplusplus
 }

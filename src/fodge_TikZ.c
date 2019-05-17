@@ -203,9 +203,7 @@ void _print_header(FILE* tex){
 
 void TikZ_table(FILE* tex, diagram_table* tab, enum draw_mode mode,
         double base_radius, double incr_radius){
-    
-    printf("TikZing table ... ");
-    
+        
     _print_header(tex);
     
     if(!tab){

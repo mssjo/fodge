@@ -25,7 +25,7 @@ extern "C" {
             double radius);    
     void TikZ_table(FILE* tex, diagram_table* tab, enum draw_mode mode,
             double base_radius, double incr_radius);
-
+    
 
 #ifdef	__cplusplus
 }

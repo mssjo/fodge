@@ -46,7 +46,7 @@ size_t _booth_normalise(const cycrep* rep, rep_level level){
     for(size_t idx = step; idx < 2*rep->length; idx += step){
         fval = ffunc[(idx - noffs)/step - 1];
         comp = compare_self(rep, idx, (1 + fval)*step + noffs, step, level, 
-                FALSE);
+                NULL);
         
         while(fval != BOOTH_NIL && comp != 0){
             if(comp < 0)
@@ -54,7 +54,7 @@ size_t _booth_normalise(const cycrep* rep, rep_level level){
             fval = ffunc[fval];
             
             comp = compare_self(rep, idx, (1 + fval)*step + noffs, step, level, 
-                    FALSE);
+                    NULL);
         }
         if(fval == BOOTH_NIL && comp != 0){
             if(comp < 0)
@@ -69,6 +69,28 @@ size_t _booth_normalise(const cycrep* rep, rep_level level){
     return rep->offset + noffs;
 }
 
+void _commit_forfeit_comp(struct forfeit_comp* fcmp){
+    if(!fcmp)
+        return;
+    for(size_t i = 0; i < fcmp->forfeit_len; i++){
+        for(size_t j = i+1; j < fcmp->forfeit_len; j++){
+            if(fcmp->forfeit[i][j] == -1)
+                fcmp->forfeit[i][j] = 1;
+        }
+    }
+}
+
+void _reset_forfeit_comp(struct forfeit_comp* fcmp){
+    if(!fcmp)
+        return;
+    for(size_t i = 0; i < fcmp->forfeit_len; i++){
+        for(size_t j = i+1; j < fcmp->forfeit_len; j++){
+            if(fcmp->forfeit[i][j] == -1)
+                fcmp->forfeit[i][j] = 0;
+        }
+    }
+}
+
 /**
  * Determines the period of the cycrep. If a previous period exists, the new one
  * can only be a multiple of that.
@@ -78,7 +100,7 @@ size_t _booth_normalise(const cycrep* rep, rep_level level){
  * @return  the period at this level
  */
 size_t _find_period(const cycrep* rep, rep_level level, 
-        int** forfeit_comp, size_t* p_idx_map){
+        struct forfeit_comp* fcmp){
     size_t step  = rep->period ? rep->period : 1;
     
     int comp;
@@ -90,22 +112,26 @@ size_t _find_period(const cycrep* rep, rep_level level,
         if(rep->length % period)
             continue;
         
-        comp = compare_self(rep, 0, period, level, forfeit_comp, p_idx_map);
-        if(comp == 0)
+        comp = compare_self(rep, 0, period, rep->length, level, fcmp);
+        if(comp == 0){
+            _commit_forfeit_comp(fcmp);
             return period;
+        }
+        else
+            _reset_forfeit_comp(fcmp);
     }
     
     return rep->length;
 }
 
 /**
- * Normalises a cycrep by determining its offset.
+ * Normalises a cycrep by determining the offset of its LCS.
  * 
  * @param rep   the cycrep - its contents will be updated by this method
  * @param level the level to look at - all previous levels must already have
  *              been visited!
  */
-void normalise_cycrep(cycrep* rep, rep_level level, size_t* p_idx_map){
+void normalise_cycrep(cycrep* rep, rep_level level){
     if(!rep)
         return;
     
@@ -129,7 +155,7 @@ void normalise_cycrep(cycrep* rep, rep_level level, size_t* p_idx_map){
  *          rep_1 is greater than rep_2, or 0 if they are equal.
  */
 int compare_cycrep(const cycrep* rep_1, const cycrep* rep_2, 
-        rep_level level){
+        rep_level level, struct forfeit_comp* fcmp){
         
     if(!rep_1){
         return rep_2 ? +1 : 0;
@@ -176,7 +202,8 @@ int compare_cycrep(const cycrep* rep_1, const cycrep* rep_2,
             if(level & FSP_LEVEL){
                 comp = compare_comprep(
                         ARROFFS(rep_1, i).lines[j].con, 
-                        ARROFFS(rep_2, i).lines[j].con);
+                        ARROFFS(rep_2, i).lines[j].con,
+                        fcmp);
                 if(comp)
                     return comp;
             }
@@ -207,12 +234,12 @@ int compare_cycrep(const cycrep* rep_1, const cycrep* rep_2,
  *          positive value if the first is greater than the second, or 0 if 
  *          they are equal.
  */
-int compare_self(const cycrep* rep, size_t idx_1, size_t idx_2, rep_level level, 
-        int** forfeit_comp, size_t* p_idx_map){
+int compare_self(const cycrep* rep, 
+        size_t idx_1, size_t idx_2, size_t seg_length, 
+        rep_level level, struct forfeit_comp* fcmp){
     
     int comp;
-    size_t p_1, p_2;
-    for(size_t i = 0; i < (rep->length - (idx_1 - idx_2)); i++){
+    for(size_t i = 0; i < seg_length; i++){
         comp = COMPARE(
                 ARROFFS(rep, i+idx_1).nlines, 
                 ARROFFS(rep, i+idx_2).nlines);
@@ -234,23 +261,11 @@ int compare_self(const cycrep* rep, size_t idx_1, size_t idx_2, rep_level level,
                 if(comp)
                     return comp;
             }
-            if(level & FSP_LEVEL){
-                if(forfeit_comp && p_idx_map){
-                    p_1 = p_idx_map[
-                            ARROFFS(rep, i+idx_1).lines[j].p_idx_in_diagr];
-                    p_2 = p_idx_map[
-                            ARROFFS(rep, i+idx_2).lines[j].p_idx_in_diagr];
-                    
-                    if(forfeit_comp[MIN(p_1,p_2)][MAX(p_1,p_2)])
-                        return +1;
-                }
-                
+            if(level & FSP_LEVEL){                
                 comp = compare_comprep(
                         ARROFFS(rep, i+idx_1).lines[j].con, 
-                        ARROFFS(rep, i+idx_2).lines[j].con);
-                
-                if(!comp && forfeit_comp && p_idx_map)
-                    forfeit_comp[MIN(p_1,p_2)][MAX(p_1,p_2)] = TRUE;
+                        ARROFFS(rep, i+idx_2).lines[j].con,
+                        fcmp);
                 
                 if(comp)
                     return comp;
@@ -358,16 +373,19 @@ size_t get_symmetry(const diagram* diagr){
     comprep* crep = diagr->rep;
     cycrep* rep;
     
-    int** forfeit_comp = salloc(crep->nreps * sizeof(int*));
-    size_t* p_idx_map = salloc(diagr->npolys * sizeof(size_t));
+    struct forfeit_comp fcmp = {
+        salloc(crep->nreps * sizeof(int*)),
+        salloc(diagr->npolys * sizeof(size_t)),
+        crep->nreps
+    };
+    
+    for(size_t r_idx = 0; r_idx < crep->nreps; r_idx++){
+        fcmp.forfeit[r_idx] = scalloc(crep->nreps, sizeof(int*));
         
-    for(size_t i = 0; i < crep->nreps; i++){
-        forfeit_comp[i] = scalloc(crep->nreps, sizeof(int*));
-        
-        rep = crep->reps[i];
-        for(size_t j = 0; j < rep->length; j++){
-            for(size_t k = 0; k < rep->array[j]->nlines; k++){
-                p_idx_map[rep->array[j]->lines[k].p_idx_in_diagr] = i;
+        rep = crep->reps[r_idx];
+        for(size_t i = 0; i < rep->length; i++){
+            for(size_t j = 0; j < rep->array[i].nlines; j++){
+                fcmp.p_idx_map[rep->array[i].lines[j].p_idx_in_diagr] = r_idx;
             }
         }
     }
@@ -378,7 +396,7 @@ size_t get_symmetry(const diagram* diagr){
         /* If this equality does not hold, there are singlets that break the
          * cyclic symmetry. */
         if(rep->length == crep->reps[i]->n_flavidx){ 
-            rep->period = _find_period(rep, ALL_LEVELS, forfeit_comp, p_idx_map);
+            rep->period = _find_period(rep, ALL_LEVELS, NULL);
             sym *= crep->reps[i]->length / crep->reps[i]->period;
         }
         else
@@ -393,27 +411,49 @@ size_t get_symmetry(const diagram* diagr){
         }
     }
     
+/*
+    * Double-checks all equal cycreps. If any equality is forfeit, or is 
+     * invalidated by forfeit equalities, their equality status is removed.
+     * This makes many passes (crep->nreps^3) since one double-check may
+     * make any other equality forfeit. *
     size_t next_eq_idx = crep->eq_reps[crep->nreps - 1] + 1;
-    for(size_t i = 0; i < crep->nreps; i++){
-        for(size_t j = i+1; j < crep->nreps; j++){
-            if(forfeit_comp[i][j]){
-                crep->eq_reps[j] = next_eq_idx;
+    for(size_t r_idx = 0; r_idx < crep->nreps; r_idx++){
+        for(size_t rr_idx = r_idx + 1; rr_idx < crep->nreps &&
+                crep->eq_reps[rr_idx] == crep->eq_reps[r_idx]; rr_idx++){
+            
+            if(fcmp.forfeit[r_idx][rr_idx] || !compare_cycrep(
+                    crep->reps[r_idx], 
+                    crep->reps[rr_idx], 
+                    ALL_LEVELS, NULL)
+            ){
+                crep->eq_reps[rr_idx] = next_eq_idx;
                 next_eq_idx++;
             }
         }
-        
-        free(forfeit_comp[i]);
+                
+        for(size_t i = 0; i < crep->nreps; i++){
+            for(size_t j = i+1; j < crep->nreps; j++){
+                if(fcmp.forfeit[i][j]){
+                    crep->eq_reps[j] = next_eq_idx;
+                    next_eq_idx++;
+                }
+            }
+        }
     }
+*/
     
-    free(forfeit_comp);
-    free(p_idx_map);
+    for(size_t i = 0; i < crep->nreps; i++)
+        free(fcmp.forfeit[i]);
+    
+    free(fcmp.forfeit);
+    free(fcmp.p_idx_map);
         
     return sym * eq_fact;
 }
 
 /**
  * This is the master comparison function for cyclic representations. It 
- * compares two comprep cycreps first by number of cycreps, and then by each
+ * compares two compound cycreps first by number of cycreps, and then by each
  * of its component cycreps level by level.
  * @param crep_1    a compund cycrep
  * @param crep_2    another comprep cycrep
@@ -421,7 +461,8 @@ size_t get_symmetry(const diagram* diagr){
  *          a negative value if it is less than crep_2, or zero if they are
  *          identical, i.e. representing equivalent diagrams.
  */
-int compare_comprep(const comprep* crep_1, const comprep* crep_2){
+int compare_comprep(const comprep* crep_1, const comprep* crep_2,
+        struct forfeit_comp* fcmp){
     int comp;
     
     if(!crep_1)
@@ -438,23 +479,39 @@ int compare_comprep(const comprep* crep_1, const comprep* crep_2){
         if(comp)
             return comp;
     }
-    
-    
-    //TODO? use rank/unique to avoid comparing multiple equal diagrams
+      
     for(size_t i = 0; i < crep_1->nreps; i++){
-        comp = compare_cycrep(crep_1->reps[i], crep_2->reps[i], TOP_LEVEL);
+        comp = compare_cycrep(crep_1->reps[i], crep_2->reps[i], TOP_LEVEL, fcmp);
         if(comp)
             return comp;
     }
     for(size_t i = 0; i < crep_1->nreps; i++){
-        comp = compare_cycrep(crep_1->reps[i], crep_2->reps[i], ORD_LEVEL);
+        comp = compare_cycrep(crep_1->reps[i], crep_2->reps[i], ORD_LEVEL, fcmp);
         if(comp)
             return comp;
     }
     for(size_t i = 0; i < crep_1->nreps; i++){
-        comp = compare_cycrep(crep_1->reps[i], crep_2->reps[i], FSP_LEVEL);
+        comp = compare_cycrep(crep_1->reps[i], crep_2->reps[i], FSP_LEVEL, fcmp);
         if(comp)
             return comp;
+    }
+    
+    if(fcmp){
+        /* Sees if the comparison of any reps in this comprep is forfeit.
+         * If so, inequality is returned. Aslo, tentatively marks new forfeit
+         * comparisons used to get to this point. */
+        size_t idx_1, idx_2;
+        for(size_t i = 0; i < crep_1->nreps; i++){
+            idx_1 = fcmp->p_idx_map[
+                    crep_1->reps[i]->array[0].lines[0].p_idx_in_diagr];
+            idx_2 = fcmp->p_idx_map[
+                    crep_2->reps[i]->array[0].lines[0].p_idx_in_diagr];
+
+            if(fcmp->forfeit[MIN(idx_1,idx_2)][MAX(idx_1,idx_2)] == 1)
+                return +1;
+
+            fcmp->forfeit[MIN(idx_1,idx_2)][MAX(idx_1,idx_2)] = -1;
+        }
     }
     
     return 0;
