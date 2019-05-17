@@ -35,7 +35,7 @@ diagram* make_contact_diagram(size_t ngons, size_t order){
     diagr->polys[0] = make_polygon(diagr->gons, NULL, ngons, order);
     
     diagr->rep = represent_diagram(diagr);
-    diagr->sym = get_symmetry(diagr->rep);
+    diagr->sym = get_symmetry(diagr);
 /*
     printf("Created O(p^%d) %d-point contact diagram.\n", 2*(order+1), ngons);
 */
@@ -129,7 +129,7 @@ diagram* _cut_edge(const diagram* base, gon_t edge, size_t ngons, size_t order){
     }
         
     cut->rep = represent_diagram(cut);
-    cut->sym = get_symmetry(cut->rep);
+    cut->sym = get_symmetry(cut);
         
     return cut;
 }
@@ -264,7 +264,7 @@ diagram* _split_poly(const diagram* base, size_t p_idx){
             //decrement_split_budget(split, left, NULL, (j-i)%2 ? 2 : 1);
                         
             split->rep = represent_diagram(split);
-            split->sym = get_symmetry(split->rep);
+            split->sym = get_symmetry(split);
                         
             root = insert_diagram(root, split);
         }
@@ -302,7 +302,7 @@ diagram* _singlet_prop(const diagram* base, size_t p_idx){
             }
             
             singlet->rep = represent_diagram(singlet);
-            singlet->sym = get_symmetry(singlet->rep);
+            singlet->sym = get_symmetry(singlet);
             
             root = insert_diagram(root, singlet);
         }

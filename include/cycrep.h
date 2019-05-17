@@ -149,7 +149,7 @@ extern "C" {
     
     size_t _actual_dist(const diagram* diagr, size_t p_idx, size_t g_idx);
     
-    size_t get_symmetry(const comprep* crep);
+    size_t get_symmetry(const diagram* diagr);
     
     int compare_comprep(const comprep* crep_1, 
             const comprep* crep_2);
