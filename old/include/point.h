@@ -19,7 +19,7 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
     
-#include "fodge_util.h"
+#include "fodge_util.hpp"
     
 #define TO_RAD(d) ((d)*M_PI/180)
 #define TO_DEG(d) ((d)*180/M_PI)

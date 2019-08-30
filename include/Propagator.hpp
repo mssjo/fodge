@@ -8,7 +8,7 @@
 #ifndef PROPAGATOR_H
 #define	PROPAGATOR_H
 
-#include "mf_fodge.hpp"
+#include "fodge.hpp"
 
 class Propagator {
 public:

@@ -8,7 +8,7 @@
 #ifndef FSP_MAP_H
 #define	FSP_MAP_H
 
-#include "fodge_util.h"
+#include "fodge_util.hpp"
 
 #ifdef	__cplusplus
 extern "C" {

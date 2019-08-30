@@ -5,8 +5,8 @@
  */
 
 
-#include "cycrep.h"
-#include "fodge.h"
+#include "cycrep.hpp"
+#include "fodge.hpp"
 
 #define BOOTH_NIL -1
 /**

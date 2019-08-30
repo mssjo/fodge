@@ -1,5 +1,5 @@
 
-#include "fodge.h"
+#include "fodge.hpp"
 
 polygon* make_polygon(const gon_t* gons, const poly_ptr* edges, 
         size_t ngons, size_t order){

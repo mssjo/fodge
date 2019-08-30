@@ -1,5 +1,5 @@
 
-#include "point.h"
+#include "point.hpp"
 #include <math.h>
 
 /**

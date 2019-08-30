@@ -5,7 +5,7 @@
  * Created on 19 June 2019, 16:09
  */
 
-#include "Propagator.h"
+#include "Propagator.hpp"
 
 Propagator::Propagator() : momenta(0), src_order(0), dst_order(0), n_mom(0) {};
 

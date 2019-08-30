@@ -1,6 +1,6 @@
 
-#include "fsp_map.h"
-#include "fodge.h"
+#include "fsp_map.hpp"
+#include "fodge.hpp"
 
 /**
  * Recursive auxiliary to count.

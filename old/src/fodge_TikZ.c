@@ -1,7 +1,7 @@
 
-#include "fodge.h"
-#include "point.h"
-#include "fodge_TikZ.h"
+#include "fodge.hpp"
+#include "point.hpp"
+#include "fodge_TikZ.hpp"
 
 #include <time.h>
 

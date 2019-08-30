@@ -12,8 +12,8 @@
 extern "C" {
 #endif
 
-#include "fodge.h"
-#include "point.h"
+#include "fodge.hpp"
+#include "point.hpp"
     
     enum draw_mode{
         DRAW_POLYGON = 0b01, DRAW_FEYNMAN = 0b10

@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fodge_util.h"
+#include "fodge_util.hpp"
 
 #ifdef	__cplusplus
 extern "C" {

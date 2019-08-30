@@ -1,6 +1,6 @@
 
-#include "fodge.h"
-#include "fsp_map.h"
+#include "fodge.hpp"
+#include "fsp_map.hpp"
 
 diagram* _make_blank_diagram(size_t ngons, size_t order){
     diagram* diagr = salloc(sizeof(diagram));

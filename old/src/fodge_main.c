@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "fodge.h"
-#include "fodge_TikZ.h"
-#include "fodge_FORM.h"
+#include "fodge.hpp"
+#include "fodge_TikZ.hpp"
+#include "fodge_FORM.hpp"
 
 /*
  * 

@@ -1,5 +1,5 @@
 
-#include "fodge_util.h"
+#include "fodge_util.hpp"
 
 size_t integer_pow(size_t base, size_t exp){
     size_t res = 1;

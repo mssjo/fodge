@@ -1,5 +1,5 @@
 
-#include "info_sort.h"
+#include "info_sort.hpp"
 
 /** Compares a[i] and b[j] using *compare, with a and b being treated as having
  *  elements of size size. */

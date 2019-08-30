@@ -10,7 +10,7 @@
 #include <numeric>
 #include <vector>
 
-#include "Generator.h"
+#include "Generator.hpp"
 
 namespace permute{
     

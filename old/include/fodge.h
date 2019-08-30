@@ -12,8 +12,8 @@
 extern "C" {
 #endif
     
-#include "fodge_util.h"
-#include "cycrep.h"
+#include "fodge_util.hpp"
+#include "cycrep.hpp"
     
     enum poly_ptr_type {
         EXT_LEG = 0, 

@@ -7,9 +7,9 @@
 
 #include <vector>
 
-#include "DiagramNode.h"
-#include "Labeling.h"
-#include "Diagram.h"
+#include "DiagramNode.hpp"
+#include "Labelling.hpp"
+#include "Diagram.hpp"
 
 /**
  * Constructs a flavour trace with a given number of legs.

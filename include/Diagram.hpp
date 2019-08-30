@@ -12,9 +12,9 @@
 
 #include "permute.hpp"
 
-#include "mf_fodge.hpp"
+#include "fodge.hpp"
 #include "DiagramNode.hpp"
-#include "Labeling.hpp"
+#include "Labelling.hpp"
 #include "Point.hpp"
 
 /**
@@ -51,7 +51,7 @@ public:
     static void FORM(std::string filename, const std::vector<Diagram> diagrs);
     
 private:
-    friend class Labeling;
+    friend class Labelling;
     
     /** The root node of the tree. */
     DiagramNode root;
@@ -66,7 +66,7 @@ private:
     std::vector<int> flav_split;
     
     /** All independent flavour-ordered labelings of the legs of the diagram. */
-    std::vector<Labeling> labelings;
+    std::vector<Labelling> labelings;
     
     void find_flav_split();
     void index();

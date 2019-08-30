@@ -1,12 +1,12 @@
 /* 
- * File:   mf_fodge.hpp
+ * File:   fodge.hpp
  * Author: Mattias
  *
  * Created on 13 June 2019, 17:46
  */
 
-#ifndef MF_FODGE_H
-#define	MF_FODGE_H
+#ifndef FODGE_H
+#define	FODGE_H
 
 #include <cstdlib>
 #include <cstdint>
@@ -43,7 +43,7 @@ typedef std::pair<int, std::vector<int>> vertex;
 
 class Diagram;
 class DiagramNode;
-class Labeling;
+class Labelling;
 class Propagator;
 
 template<typename T>
@@ -71,5 +71,5 @@ std::ostream& operator<<(std::ostream& out, const std::pair<T1, T2> pair){
     return out;
 }
 
-#endif	/* MF_FODGE_H */
+#endif	/* FODGE_H */
 

@@ -7,7 +7,7 @@
  * Created on 12 June 2019, 15:37
  */
 
-#include "Diagram.h"
+#include "Diagram.hpp"
 
 /** 
  * @brief Default constructor.
@@ -33,7 +33,7 @@ Diagram::Diagram(int order, const std::vector<int>& fsplit)
 {
     std::sort(flav_split.begin(), flav_split.end());
     index();
-    labelings.push_back(Labeling(root, n_legs));
+    labelings.push_back(Labelling(root, n_legs));
 }
 
 /**
@@ -180,7 +180,7 @@ std::ostream& operator<<(std::ostream& out, const Diagram& d){
             << ":\n\t";
     
     d.labelings.front().print_header(out);
-    for(Labeling lbl : d.labelings)
+    for(Labelling lbl : d.labelings)
         out << "\n\t" << lbl;
     
     out << std::endl;
@@ -215,13 +215,13 @@ void Diagram::index(){
 
 void Diagram::label(){
     labelings.clear();
-    labelings.push_back(Labeling(root, n_legs));
+    labelings.push_back(Labelling(root, n_legs));
         
     for(permute::ZR_Generator zr(flav_split); zr; ++zr)        
-        labelings.push_back(Labeling(labelings.front(), *zr));
+        labelings.push_back(Labelling(labelings.front(), *zr));
         
     std::sort(labelings.begin(), labelings.end());
-    std::vector<Labeling>::iterator last 
+    std::vector<Labelling>::iterator last 
             = std::unique(labelings.begin(), labelings.end());
     labelings.resize(std::distance(labelings.begin(), last));
 }
@@ -246,7 +246,7 @@ std::vector<Diagram> Diagram::extend(
     //All locations in the diagram where, in some labeling, an index
     //representative occurs, are marked as distinct places to put a new vertex.
     auto rep_locs = std::unordered_set<int>();
-    for(Labeling& lbl : labelings){
+    for(Labelling& lbl : labelings){
         auto idx_loc = lbl.index_locations();
         for(int rep : idx_reps)
             rep_locs.insert(idx_loc[rep]);

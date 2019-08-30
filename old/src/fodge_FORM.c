@@ -1,5 +1,5 @@
 
-#include "fodge_FORM.h"
+#include "fodge_FORM.hpp"
 
 void _FORM_indent(FILE* form, size_t depth){
     fprintf(form, "        ");

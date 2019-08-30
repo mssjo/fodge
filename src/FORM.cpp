@@ -1,6 +1,6 @@
 
-#include "Diagram.h"
-#include "DiagramNode.h"
+#include "Diagram.hpp"
+#include "DiagramNode.hpp"
 
 #define INDENT_SIZE 4
 

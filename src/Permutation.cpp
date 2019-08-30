@@ -7,7 +7,7 @@
 
 #include <numeric>
 
-#include "Permutation.h"
+#include "Permutation.hpp"
 
 namespace permute{
 

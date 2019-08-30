@@ -40,8 +40,8 @@
 extern "C" {
 #endif
     
-#include "fodge.h"
-#include "info_sort.h"
+#include "fodge.hpp"
+#include "info_sort.hpp"
 
     /** The levels of a cycrep. */
     typedef enum rep_level_enum {

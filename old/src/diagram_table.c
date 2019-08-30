@@ -1,5 +1,5 @@
 
-#include "fodge.h"
+#include "fodge.hpp"
 
 diagram* _fill_table(diagram_table* tab, size_t ngons, size_t order){ 
     idprintf("Generating O(p^%d) %d-point diagrams...\n", OP(order), ngons);

@@ -1,5 +1,5 @@
 /* 
- * File:   Labeling.cpp
+ * File:   Labelling.cpp
  * Author: Mattias
  * 
  * Created on 13 June 2019, 17:55
@@ -7,12 +7,12 @@
 
 #include <vector>
 
-#include "Labeling.h"
-#include "Permutation.h"
+#include "Labelling.hpp"
+#include "Permutation.hpp"
 
-Labeling::Labeling() : perm(), props() {};
+Labelling::Labelling() : perm(), props() {};
 
-Labeling::Labeling(DiagramNode& root, int n_legs) 
+Labelling::Labelling(DiagramNode& root, int n_legs) 
 : perm(n_legs), props()
 {
     root.set_momenta();
@@ -20,7 +20,7 @@ Labeling::Labeling(DiagramNode& root, int n_legs)
     normalise();
 }
 
-Labeling::Labeling(const Labeling& orig, const permute::Permutation& cycl)
+Labelling::Labelling(const Labelling& orig, const permute::Permutation& cycl)
 : perm(cycl), props() 
 {    
     for(const Propagator& p : orig.props)
@@ -29,27 +29,27 @@ Labeling::Labeling(const Labeling& orig, const permute::Permutation& cycl)
     normalise();
 }
 
-void Labeling::normalise(){
+void Labelling::normalise(){
     std::sort(props.begin(), props.end());
     std::vector<Propagator>::iterator last = std::unique(props.begin(), props.end());
     props.resize(std::distance(props.begin(), last));
 }
 
-permute::Permutation Labeling::index_locations() const {
+permute::Permutation Labelling::index_locations() const {
     return perm.inverse();
 }
 
-bool operator<(const Labeling& l1, const Labeling& l2){
+bool operator<(const Labelling& l1, const Labelling& l2){
     if(l1.props.size() != l2.props.size())
         return l1.props.size() < l2.props.size();
     return l1.props < l2.props;
 }
 
-bool operator==(const Labeling& l1, const Labeling& l2){
+bool operator==(const Labelling& l1, const Labelling& l2){
     return l1.props == l2.props;
 }
 
-std::ostream& operator<<(std::ostream& out, const Labeling& l){
+std::ostream& operator<<(std::ostream& out, const Labelling& l){
     out << l.perm;
     for(const Propagator& p : l.props)
         out << " | " << p;
@@ -59,7 +59,7 @@ std::ostream& operator<<(std::ostream& out, const Labeling& l){
     return out;
 }
 
-void Labeling::print_header(std::ostream& out) const{
+void Labelling::print_header(std::ostream& out) const{
     out << permute::Permutation::identity(perm.size());
     for(const Propagator& p : props){
         out << std::string(strlen(" | "), ' ');

@@ -6,7 +6,7 @@
  */
 
 
-#include "cycrep.h"
+#include "cycrep.hpp"
 
 /** Comparison function for use with infosort.  */
 int _compare_con(const void* a, const void* b){

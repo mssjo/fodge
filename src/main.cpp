@@ -5,9 +5,9 @@
  * Created on 12 June 2019, 15:34
  */
 
-#include "mf_fodge.h"
-#include "Diagram.h"
-#include "permute.h"
+#include "fodge.hpp"
+#include "Diagram.hpp"
+#include "permute.hpp"
 
 #include <fstream>
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     
     std::ofstream tikz;
     
-    tikz.open("mf_fodge.tex");
+    tikz.open(".tex");
     
     int count = 0;
     for(Diagram& d : Diagram::generate(order, n_legs, true)){

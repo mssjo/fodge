@@ -8,8 +8,8 @@
 #ifndef FODGE_FORM_H
 #define	FODGE_FORM_H
 
-#include "fodge.h"
-#include "fsp_map.h"
+#include "fodge.hpp"
+#include "fsp_map.hpp"
 
 #ifdef	__cplusplus
 extern "C" {

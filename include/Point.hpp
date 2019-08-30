@@ -8,7 +8,7 @@
 #ifndef POINT_H
 #define	POINT_H
 
-#include "mf_fodge.hpp"
+#include "fodge.hpp"
 
 class Point {
 public:

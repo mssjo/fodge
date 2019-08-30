@@ -5,7 +5,7 @@
  * Created on 19 June 2019, 19:28
  */
 
-#include "Point.h"
+#include "Point.hpp"
 
 Point::Point(double x, double y, const Point& origin) 
     : _x(x + origin._x), _y(y + origin._y) 
