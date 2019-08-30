@@ -1,5 +1,5 @@
 /* 
- * File:   Diagram.h
+ * File:   Diagram.hpp
  * Author: Mattias Sjo
  * 
  * Implemented in Diagram.cpp
@@ -10,12 +10,12 @@
 #ifndef DIAGRAM_H
 #define	DIAGRAM_H
 
-#include "permute.h"
+#include "permute.hpp"
 
-#include "mf_fodge.h"
-#include "DiagramNode.h"
-#include "Labeling.h"
-#include "Point.h"
+#include "mf_fodge.hpp"
+#include "DiagramNode.hpp"
+#include "Labeling.hpp"
+#include "Point.hpp"
 
 /**
  * @brief Describes flavour-ordered tree-level diagrams as trees.

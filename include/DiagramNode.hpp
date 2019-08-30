@@ -1,5 +1,5 @@
 /* 
- * File:   DiagramNode.h
+ * File:   DiagramNode.hpp
  * Author: Mattias
  *
  * Created on 13 June 2019, 14:59
@@ -11,9 +11,9 @@
 #include <utility>
 #include <unordered_set>
 
-#include "mf_fodge.h"
-#include "Propagator.h"
-#include "Point.h"
+#include "mf_fodge.hpp"
+#include "Propagator.hpp"
+#include "Point.hpp"
 
 class DiagramNode {
 public:

@@ -1,5 +1,5 @@
 /* 
- * File:   Labeling.h
+ * File:   Labeling.hpp
  * Author: Mattias
  *
  * Created on 13 June 2019, 17:55
@@ -8,11 +8,11 @@
 #ifndef LABELING_H
 #define	LABELING_H
 
-#include "mf_fodge.h"
+#include "mf_fodge.hpp"
 
-#include "Propagator.h"
-#include "DiagramNode.h"
-#include "Permutation.h"
+#include "Propagator.hpp"
+#include "DiagramNode.hpp"
+#include "Permutation.hpp"
 
 class Labeling {
 public:

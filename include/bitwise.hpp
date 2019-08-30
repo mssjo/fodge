@@ -1,5 +1,5 @@
 /* 
- * File:   bitwise.h
+ * File:   bitwise.hpp
  * Author: Mattias
  * 
  * Utility templates for bitwise operations.

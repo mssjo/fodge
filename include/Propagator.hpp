@@ -1,5 +1,5 @@
 /* 
- * File:   Propagator.h
+ * File:   Propagator.hpp
  * Author: Mattias
  *
  * Created on 19 June 2019, 16:09
@@ -8,7 +8,7 @@
 #ifndef PROPAGATOR_H
 #define	PROPAGATOR_H
 
-#include "mf_fodge.h"
+#include "mf_fodge.hpp"
 
 class Propagator {
 public:

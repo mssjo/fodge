@@ -1,5 +1,5 @@
 /* 
- * File:   mf_fodge.h
+ * File:   mf_fodge.hpp
  * Author: Mattias
  *
  * Created on 13 June 2019, 17:46
@@ -28,8 +28,8 @@
 #include <numeric>
 #include <bitset>
 
-#include "permute.h"
-#include "bitwise.h"
+#include "permute.hpp"
+#include "bitwise.hpp"
 
 #define PI 3.14159265358979
 

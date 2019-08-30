@@ -1,5 +1,5 @@
 /* 
- * File:   permute.h
+ * File:   permute.hpp
  * Author: Mattias
  *
  * Created on 27 June 2019, 18:03
@@ -17,8 +17,8 @@
 #include <numeric>
 #include <algorithm>
 
-#include "Permutation.h"
-#include "Generator.h"
+#include "Permutation.hpp"
+#include "Generator.hpp"
 
 #endif	/* PERMUTE_H */
 

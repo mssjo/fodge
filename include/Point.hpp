@@ -1,5 +1,5 @@
 /* 
- * File:   Point.h
+ * File:   Point.hpp
  * Author: Mattias
  *
  * Created on 19 June 2019, 19:28
@@ -8,7 +8,7 @@
 #ifndef POINT_H
 #define	POINT_H
 
-#include "mf_fodge.h"
+#include "mf_fodge.hpp"
 
 class Point {
 public:

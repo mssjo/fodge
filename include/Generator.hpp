@@ -1,5 +1,5 @@
 /* 
- * File:   Generator.h
+ * File:   Generator.hpp
  * Author: Mattias
  * 
  * Implements group generators as iterators.
@@ -13,7 +13,7 @@
 
 #include <vector>
 
-#include "Permutation.h"
+#include "Permutation.hpp"
 
 namespace permute{
 
