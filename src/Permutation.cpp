@@ -12,7 +12,7 @@
 namespace permute{
 
 /**
- * Generates the identity permutation.
+ * @brief Generates the identity permutation.
  * @param size  the size of the permutation. Must be greater than zero.
  */
 Permutation::Permutation(size_t size) : map(size) {
@@ -20,19 +20,29 @@ Permutation::Permutation(size_t size) : map(size) {
     std::iota(map.begin(), map.end(), 0);
 }
 
-Permutation::Permutation(std::initializer_list<size_t> il) : map(il) {
-    assert(is_permutation(il.begin(), il.end()));
-}
+/**
+ * @brief Generates a permutation from an initialiser list.
+ * @param il the initialiser list.
+ * 
+ * The initialiser list must contain a valid permutation as per
+ * @link Permutation::is_permutation @endlink. No checks are made
+ * here to verify that.
+ */
+Permutation::Permutation(std::initializer_list<size_t> il) : map(il) 
+{}
 
 /**
- * Private unchecked wrapper constructor.
+ * @brief Private conversion constructor.
  * @param perm  the internal representation of the permutation.
  */
 Permutation::Permutation(std::vector<size_t>& perm) : map(perm) {};
 
 /**
- * Creates an identity permutation. This functionality is also provided by a
+ * @brief Creates an identity permutation. 
+ * 
+ * This functionality is also provided by a
  * constructor, but is given as a named function for clarity.
+ * 
  * @param size  the size of the permutation. Must be greater than 0.
  * @return  the identity permutation.
  */
@@ -40,7 +50,8 @@ Permutation Permutation::identity(size_t size){
     return Permutation(size);
 }
 /**
- * Creates a cyclic permutation.
+ * @brief Creates a cyclic permutation.
+ * 
  * @param size  the size of the permutation. Must be greater than 0.
  * @param coffs the cyclic offset: 1 for a one-step left-rotation, etc.
  * @return  the cyclic permutation.
@@ -55,7 +66,7 @@ Permutation Permutation::cyclic(size_t size, size_t coffs){
 }
 
 /**
- * Constructs the reverse of a permutation.
+ * @brief Constructs the reverse of a permutation.
  * @return a permutation that reverses the elements in addition to whatever
  *          effect the original permutation had.
  */
@@ -69,7 +80,7 @@ Permutation Permutation::reverse() const {
 }
 
 /**
- * Constructs the inverse of a permutation.
+ * @brief Constructs the inverse of a permutation.
  * @return the unique permutation such that @code *this * inverse() @endcode
  *          is the identity.
  */
@@ -89,10 +100,14 @@ Permutation Permutation::inverse() const {
  * is the identity. It is equal to the least common multiple of the lengths of 
  * all cycles in the cycle decomposition of the permutation.
  * 
- * @return the order.
+ * @return the order, also called the <i>period</i>, not the same thing as what
+ * is called <i>size</i> here.
  */
 size_t Permutation::order() const {
     auto decomp = cycle_type();
+    
+    //Efficient calculation using an gcd-based sum over
+    //the cycle type.
     return std::accumulate(decomp.begin(), decomp.end(), 1, 
             [](size_t a, size_t b) {
                 auto gcd = [] (size_t a, size_t b) {
@@ -109,7 +124,7 @@ size_t Permutation::order() const {
 }
 
 /**
- * Checks whether a permutation is the identity.
+ * @brief Checks whether a permutation is the identity.
  * 
  * @return @c true if and only if the permutation is the identity. 
  */
@@ -161,6 +176,7 @@ Permutation& Permutation::permute(
     Permutation& p, size_t offset, size_t block_len) const
 {
     permute(p.map.begin(), offset, block_len);
+    return p;
 }
 
 /**
@@ -221,7 +237,8 @@ Permutation& operator*= (Permutation& p1, const Permutation& p2){
  * 
  * The complexity of this operator is linear in the size of @p p (as inherited
  * from the composition operator) and logarithmic in @p pow. Since @p pow can
- * always be reduced to be less than @c p.order() , whose upper bound is roughly
+ * always be reduced to be less than @link Propagator::order p.order() @endlink, 
+ * whose upper bound is roughly
  * exponential in @c p.size() , the worst-case complexity of this operator is
  * quadratic in the size of @p p .
  * 
@@ -248,7 +265,7 @@ Permutation operator^ (const Permutation& p, size_t pow){
     return res;
 }
 /**
- * Assigns @code p ^ pow @endcode to @p p.
+ * @brief Assigns @code p ^ pow @endcode to @p p.
  */
 Permutation& operator^= (Permutation& p, size_t pow){
     p = p ^ pow;
@@ -291,7 +308,7 @@ Permutation operator% (const Permutation& p1, const Permutation& p2){
     return least;
 }
 /**
- * Assigns @code p1 % p2 @endcode to @p p.
+ * @brief Assigns @code p1 % p2 @endcode to @p p.
  */
 Permutation& operator%= (Permutation& p1, const Permutation& p2){
     p1 = p1 % p2;
@@ -299,20 +316,22 @@ Permutation& operator%= (Permutation& p1, const Permutation& p2){
 }
 
 /**
- * Compares two permutations for equality.
+ * @brief Compares two permutations for equality.
  */
 bool operator== (const Permutation& p1, const Permutation& p2){
     return p1.map == p2.map;
 }
 
 /**
- * Compares two permutations for inequality.
+ * @brief Compares two permutations for inequality.
  */
 bool operator!= (const Permutation& p1, const Permutation& p2){
     return p1.map != p2.map;
 }
 
 /**
+ * @brief prints a string representaiton of a permutation.
+ * 
  * Prints a permutation as a space-separated list of its indices, enclosed in
  * parentheses. This is reminiscent of Cauchy's two-line notation, with the 
  * elements sorted so that the first line is the identity permutation, and with
@@ -365,8 +384,8 @@ std::vector<size_t> Permutation::cycle_type() const {
 }
 
 /**
- * Finds all fixed points under the permutation, i.e. the indices that are 
- * mapped to themselved.
+ * @brief Finds all fixed points under the permutation, i.e. the 
+ * indices that are mapped to themselved.
  * 
  * @return the indices of the fixed points as a sorted vector. 
  */

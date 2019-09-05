@@ -1,6 +1,9 @@
 /* 
  * File:   fodge.hpp
- * Author: Mattias
+ * Author: Mattias Sjo
+ * 
+ * Contains some overall definitions, utility methods, 
+ * and common includes.
  *
  * Created on 13 June 2019, 17:46
  */
@@ -49,6 +52,15 @@ class DiagramNode;
 class Labelling;
 class Propagator;
 
+/**
+ * @brief Prints a vector as a space-separated sequence of elements,
+ * surrounded by curly braces.
+ * 
+ * @tparam T the element type of the vector.
+ * @param out the stream to which the vector is printed.
+ * @param vec the vector.
+ * @return the stream.
+ */
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const std::vector<T> vec){
     out << "{ ";
@@ -58,15 +70,34 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T> vec){
     
     return out;
 }
+/**
+ * @brief Prints an unordered set as a space-separated sequence of elements,
+ * surrounded by curly braces.
+ * 
+ * @tparam T the element type of the vector.
+ * @param out the stream to which the vector is printed.
+ * @param set the set.
+ * @return the stream.
+ */
 template<typename T>
-std::ostream& operator<<(std::ostream& out, const std::unordered_set<T> vec){
+std::ostream& operator<<(std::ostream& out, const std::unordered_set<T> set){
     out << "{ ";
-    for(const T& t : vec)
+    for(const T& t : set)
         out << t << " ";
     out << "}";
     
     return out;
 }
+/**
+ * @brief Prints a pair as space-separated parenthesis-surrounded
+ * elements.
+ * 
+ * @tparam T1 the type of the first element.
+ * @tparam T2 the type of the second element.
+ * @param out the stream to which the pair is printed.
+ * @param pair the pair.
+ * @return the stream.
+ */
 template<typename T1, typename T2>
 std::ostream& operator<<(std::ostream& out, const std::pair<T1, T2> pair){
     out << "(" << pair.first << " " << pair.second << ")";

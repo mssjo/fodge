@@ -19,6 +19,14 @@ using namespace std;
 using namespace permute;
 
 
+/**
+ * @brief Parses a flavour splits for the --include-flav-split 
+ *      and --exclude-flav-split options.
+ * 
+ * @param str the input string.
+ * @param flav_splits the parsed flavour splits are put here.
+ * @return @c true if an error occurred, @c false otherwise.
+ */
 bool parse_flav_split(char* str, vector< vector<int> >& flav_splits){
     
     vector<int> flav_split = vector<int>();
@@ -72,6 +80,13 @@ bool parse_flav_split(char* str, vector< vector<int> >& flav_splits){
     return false;
 }
 
+
+/**
+ * @brief Prints the help message.
+ * 
+ * FODGE is simple enough that manual formatting was quicker than automatically
+ * generating the message a la man.
+ */
 void print_help(){
    
                                                                             //64-col here         
@@ -150,12 +165,16 @@ void print_help(){
             " If you have questions, please email mattias.sjo@thep.lu.se. \n\n";
 }
 
+/**
+ * @brief Parses command line options and runs FODGE accordingly.
+ * 
+ * @param argc the length of @p argv.
+ * @param argv the command line input.
+ * @return 0 if everything went fine, a nonzero number if it did not.
+ */
 int main(int argc, char** argv) {
-    /*
-    cout << argc;
-    for(int i = 1; i < argc; i++)
-        cout << "  " << argv[i];*/
     
+    //Sets up all parameters and default values.
     int n_legs, order;
     
     bool gen_form = false, gen_tikz = false;
@@ -171,6 +190,8 @@ int main(int argc, char** argv) {
     bool singlets = true, incl_fsp = false;
     vector< vector<int> > flav_splits = vector< vector<int> >();
     
+    // I opted for good ol' C-style getopt here 
+    //rather than doing something fancy.
     opterr = 1;
     const char* short_opts = "hN:O:tT:r:fldvo:n:sSi:x:";
     struct option long_opts[] = {
@@ -193,28 +214,14 @@ int main(int argc, char** argv) {
         {0,0,0,0}
     };
     
-    
-    
+    //Handles all options in turn    
     while(true){
         int opt_idx = -1;
         int c = getopt_long(argc, argv, short_opts, long_opts, &opt_idx);
         
         if(c == -1)
             break;
-        
-        if(opt_idx >= 0 && opt_idx < 16){
-            cout << "Option --" << long_opts[opt_idx].name << " (-" << (char)c << ")";
-            if(long_opts[opt_idx].has_arg)
-                cout << " with argument \"" << optarg << "\"";
-            cout << "\n";
-        }
-        else{
-            cout << "Option -" << (char)c;
-            if(strchr(short_opts, c)[1] == ':')
-                cout << " with argument \"" << optarg << "\"";
-            cout << "\n";
-        }
-        
+                
         switch(c){
             case 'h':
                 print_help();
@@ -272,6 +279,7 @@ int main(int argc, char** argv) {
         }
     }       
     
+    //Parses unnamed options.
     if(optind < argc)
         order = atoi(argv[optind++]);
     if(optind < argc)
@@ -280,79 +288,18 @@ int main(int argc, char** argv) {
         cerr << "ERROR: too many unnamed arguments (max 2 allowed)\n";
         return 1;
     }
-                /*
-                
     
-    
-    
-    po::options_description opts("Allowed options");
-    opts.add_options()
-        ("help,h", "print help message")
-        ("number-of-legs,N", po::value<uint>()->default_value(4),
-                            "the number of external legs on the diagrams, an even "
-                            "integer greater or equal than 4. The first unnamed "
-                            "argument is interpreted as the number of legs. If no "
-                            "number is given, 4 is assumed.")
-        ("order,O", po::value<uint>()->default_value(2),
-                            "the order of the diagrams, a strictly positive even" 
-                            "integer. The second unnamed argument is interpreted "
-                            "as the order. If no order is given, 2 (NLO diagram) "
-                            "is assumed.")
-        ("generate-tikz,t", "generate TikZ code for drawing diagrams")
-        ("tikz-split", po::value<uint>(),
-                            "splits the generated TikZ file into several files, "
-                            "each containing this many diagrams. Useful when a "
-                            "single file overflows LaTeX's memory.")
-        ("generate-form,f", "generate FORM code for calculating amplitudes.")
-        ("list-diagrams,l", "prints a summary of the generated diagrams.")
-        ("detailed-list,L", "prints a detailed description of the generated "
-                            "diagrams and their distinct labellings.")
-        ("output,o", po::value<string>(), 
-                            "selects the directory in which generated files "
-                            "are output. The default is \"output/\".")
-        ("name,n", po::value<string>(),
-                            "prepends a name to the generated files, e.g. "
-                            "\"your_name_M8p6_diagr.hf\".")
-        ("no-flavour-splits,F",
-                            "excludes flavour-split diagrams.")
-        ("no-singlets,S",   "excludes singlet diagrams.")
-        ("include-flavour-split, I", po::value<string>()->multitoken(), 
-                            "takes one or more flavour splits as options and "
-                            "discards all diagrams that do not have these splits. "
-                            "The splits should be specified as comma-separated lists "
-                            "of numbers that add up to the number of legs, and several "
-                            "splits can be given "
-                            "(e.g. -N=6 --include-flavour-split=6 2,4 3,3)")
-        ("exclude-flavour-split, X", po::value<string>()->multitoken(),
-                            "works like include-flavour-split, but discards the "
-                            "diagrams that have the specified splits rather than "
-                            "those that do not.")
-        ;
-        */
-    /*
-    po::variables_map var_map;
-    po::store(po::command_line_parser(argc, argv)
-                    .options(opts)
-                    .positional(pos_opts)
-                    .run(), 
-              var_map);
-    po::notify(var_map);*/
-    
-        /*
-    if(var_map.count("help")){
-        cout << opts << std::endl;
-        return 0;
-    }
-    */
-        
+    //Handles bad input.
     if(n_legs < 4 || n_legs % 2){
-        cerr    << "ERROR: invalid number of legs: " << n_legs << "\n\t(must be even and >= 4)" 
+        cerr    << "ERROR: invalid number of legs: " 
+                << n_legs << "\n\t(must be even and >= 4)" 
                 << endl;
         return 1;
     }
     
     if(order < 2 || order % 2){
-        cerr    << "ERROR: invalid order: " << order << "\n\t(must be even and >= 2)" 
+        cerr    << "ERROR: invalid order: " 
+                << order << "\n\t(must be even and >= 2)" 
                 << endl;
         return 1;
     }
@@ -372,18 +319,20 @@ int main(int argc, char** argv) {
     cout << "\n" 
          << " --*-*-- FODGE version 2.0 --*-*--\n"
          << " --*-*-- Mattias Sjo, 2019 --*-*--\n";
+         
     cout << "\nGenerating diagrams...\n";
-    
     auto diagrs = Diagram::generate(order, n_legs, singlets, true, verbose);
         
     cout << "\n";
     
+    //Implements filter
     if(!flav_splits.empty()){
         cout << Diagram::filter_flav_split(diagrs, flav_splits, incl_fsp)
             << " diagrams removed by flavour split filter "
             << (incl_fsp ? "(inclusive)" : "(exclsive)") << "\n\n";
     }
     
+    //Prints details
     if(detailed && !diagrs.empty()){
         cout << "Generated diagrams:\n";
         int count = 0;
@@ -391,6 +340,7 @@ int main(int argc, char** argv) {
             cout << "[" << ++count << "] " << d << endl;
     }
         
+    //Handles TikZ and FORM output
     ostringstream filename;
     filename << out_dir << out_tag << (out_tag.empty() ? "M" : "_M") 
              << n_legs << "p" << order;
@@ -398,8 +348,11 @@ int main(int argc, char** argv) {
     if(gen_tikz){
         cout << "\n";
         
-        if(Diagram::TikZ(filename.str(), diagrs, tikz_split_size, radius))
+        if(Diagram::TikZ(filename.str() + "_tikz", 
+            diagrs, tikz_split_size, radius))
+        {
             return 1;
+        }
     }   
     
     if(gen_form){
@@ -409,9 +362,11 @@ int main(int argc, char** argv) {
             return 1;
     }
     
+    //Prints summary
     if(list && !diagrs.empty())
         Diagram::summarise(cout << "\n", diagrs);
     
+    //Only default output: number of diagrams generated.
     cout << "\nTotal diagrams: " << diagrs.size() << endl;
     
     return 0;

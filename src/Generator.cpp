@@ -15,7 +15,7 @@
 namespace permute{
     
 /**
- * Base constructor: sets up the identity permutation.
+ * @brief Base constructor: sets up the identity permutation.
  * @param n the size of the permutation.
  */
 Generator::Generator(int n)
@@ -23,8 +23,8 @@ Generator::Generator(int n)
 {}
 
 /**
- * Constructs a Generator for @f$Z_n$.
- * @param n the value of @f$n$.
+ * @brief Constructs a Generator for @f$   Z_n @f$.
+ * @param n the value of @f$ n @f$.
  */
 Zn_Generator::Zn_Generator(int n) 
 : Generator(n), n(n), count(0)
@@ -48,18 +48,9 @@ Zn_Generator& Zn_Generator::operator++(){
     return *this;
 }
 
-///**
-// * Post-increment version of @link Zn_Generator::operator++() 
-// */
-//Zn_Generator Zn_Generator::operator++(int dummy){
-//    Zn_Generator const tmp(*this);
-//    ++*this;
-//    return tmp;
-//}
-
 /**
- * Constructs a Generator for @f$S_n$.
- * @param n the value of @f$n$.
+ * Constructs a Generator for @f$ \mathcal S_n @f$.
+ * @param n the value of @f$ n @f$.
  */
 Sn_Generator::Sn_Generator(int n) 
 : Generator(n), n(n), ctr_stack(n, 0), stack_idx(0)
@@ -69,10 +60,10 @@ Sn_Generator::Sn_Generator(int n)
  * @brief Visits the next permutation through the non-recursive version of 
  * Heap's algorithm.
  * 
- * Heap's algorithm visits all permutations of @f$n$ elements exactly once and
+ * Heap's algorithm visits all permutations of @f$ n @f$ elements exactly once and
  * moves to each new permutation by only exchanging two elements. The algorithm
- * is recursive in nature and generates all permutations of the first @f$k-1$
- * elements before touching the @f$k$th. Here, we emulate the recursion by
+ * is recursive in nature and generates all permutations of the first @f$ k-1 @f$
+ * elements before touching the @f$ k @f$ th. Here, we emulate the recursion by
  * maintaining a stack of counters rather than recursively nested @c for loops. 
  * 
  * @return the updated generator.
@@ -100,18 +91,10 @@ Sn_Generator& Sn_Generator::operator++(){
     done = true;
     return *this;    
 }
-///**
-// * Post-increment version of @link Sn_Generator::operator++() 
-// */
-//Sn_Generator Sn_Generator::operator ++(int dummy){
-//    Sn_Generator const tmp(*this);
-//    ++*this;
-//    return tmp;
-//}
 
 /**
- * Constructs a generator for @f$Z_R$.
- * @param R @f$R$, an ordered sequence of integers. If the sequence is not 
+ * @brief Constructs a generator for @f$   Z_R @f$.
+ * @param R @f$ R @f$, an ordered sequence of integers. If the sequence is not 
  *      ordered, the Generator will not work as intended. The size of the 
  *      permutations is the sum of the elements of @p R.
  */
@@ -165,7 +148,7 @@ ZR_Generator::ZR_Generator(const std::initializer_list<int>& R)
 : ZR_Generator(std::vector<int>(R)) {}
 
 /**
- * Visits the next permutation by updating the subcomponent groups in turn.
+ * @brief Visits the next permutation by updating the subcomponent groups in turn.
  * @return the updated generator.
  */
 ZR_Generator& ZR_Generator::operator++(){
@@ -192,14 +175,6 @@ ZR_Generator& ZR_Generator::operator++(){
     done = true;
     return *this;
 }
-///**
-// * Post-increment version of @link ZR_Generator::operator++() 
-// */
-//ZR_Generator ZR_Generator::operator ++(int dummy){
-//    ZR_Generator const tmp(*this);
-//    ++*this;
-//    return tmp;
-//}
 
 
 }

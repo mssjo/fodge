@@ -18,8 +18,10 @@
 namespace permute{
 
 /**
- * A Generator is an input iterator that produces all elements in a group of
- * permutations. This is an abstract class; subclasses implment specific groups
+ * @brief A Generator is an input iterator that produces all elements in a group
+ * of permutations. 
+ * 
+ * This is an abstract class; subclasses implment specific groups
  * and must obey the following properties:
  * <ul>
  *  <li> The Generator is initialised so that dereferencing it yields the
@@ -28,7 +30,7 @@ namespace permute{
  *  <li> All permutations in the group are generated exactly once before any
  *      permutation is repeated.
  *  <li> When the entire group has been generated, and only then, should  
- *      @code operator bool @endcode yield @true .
+ *      @code operator bool @endcode yield @c true .
  *  <li> Other than the value of  @code operator bool @endcode, the
  *      Generator should otherwise be in the same state after traversing the
  *      entire group as it was immediately after initialisation. This allows
@@ -50,7 +52,7 @@ public:
     Generator(int n);
 
     /**
-     * Converts the Generator to a Boolean value indicating whether it has
+     * @brief Converts the Generator to a Boolean value indicating whether it has
      * completed a traversal of its group.
      * @return @c true if and only if the Generator has completed a traversal
      *          and is pointing to the identity permutation.
@@ -58,12 +60,12 @@ public:
     explicit operator bool() const  {   return !done;   }
 
     /**
-     * Dereferences the Generator.
+     * @brief Dereferences the Generator.
      * @return a const reference to the current permutation.
      */
     reference operator*() const     {   return perm;    }
     /**
-     * Dereferences the Generator though a pointer.
+     * @brief Dereferences the Generator though a pointer.
      * @return a const pointer to the current permutation.
      */
     pointer operator->() const      {   return &perm;   }
@@ -79,7 +81,8 @@ protected:
 };
 
 /**
- * A Generator that generates the cyclic group @f$Z_n$ of @p n objects.
+ * @brief A Generator that generates the cyclic group @f$   Z_n @f$ 
+ *      of @p n objects.
  */
 class Zn_Generator : public Generator {
 
@@ -100,8 +103,10 @@ private:
 };
 
 /**
- * A Generator that generates the full permutation group @f$S_n$ 
- * of @p n objects. It employs the non-recursive Heap's algorithm, which
+ * @brief A Generator that generates the full permutation group 
+ * @f$ \mathcal S_n @f$ of @p n objects. 
+ * 
+ * It employs the non-recursive Heap's algorithm, which
  * efficiently traverses the set of permutations in such a way that each
  * permutation differs from its predecessor by a single index exchange.
  */
@@ -118,8 +123,7 @@ public:
 private:
     int n;
     
-    /** A stack of counters used in the non-recursive form of Heap's algorithm.
-     */
+    /** A stack of counters used in the non-recursive form of Heap's algorithm.*/
     std::vector<int> ctr_stack;
     /** The current location in the stack. */
     int stack_idx;
@@ -127,11 +131,13 @@ private:
 };
 
 /**
- * A Generator that generates the group @f$Z_R$, where @f$R$ is an ordered
- * sequence of integers. This is the symmetry group of a product of traces,
+ * @brief A Generator that generates the group @f$   Z_R @f$, 
+ * where @f$ R @f$ is an ordered sequence of integers. 
+ * 
+ * This is the symmetry group of a product of traces,
  * where the ith trace contains a number of matrices equal to the ith element
- * in @f$R$, under permutations of the set of matrices. The group combines
- * cyclic permutations within each trace, and block-wise exchanges of the 
+ * in @f$ R @f$, under permutations of the set of matrices. The group combines
+ * cyclic permutations within each trace with block-wise exchanges of the 
  * contents of traces that contain equally many matrices.
  */
 class ZR_Generator : public Generator {

@@ -10,6 +10,9 @@
 
 #include "fodge.hpp"
 
+/**
+ * @brief A simple class representing a 2D point by its Cartesian coordinates.
+ */
 class Point {
 public:
     Point() = default;
@@ -21,7 +24,7 @@ public:
     static Point polar(double radius, double angle, 
             const Point& origin = Point());
     static std::vector<Point> circle(double radius, int n_points, 
-        const Point& origin = Point());
+        const Point& origin = Point(), double angle_offset = 0);
     
     double x() const;
     double y() const;
@@ -37,7 +40,8 @@ public:
     static double deg_to_rad(double angle);
     static double rad_to_deg(double angle);
     static double normalise_angle(double angle);
-    static double angle_in_range(double angle, double min, double max, double incr = 2*PI);
+    static double angle_in_range(double angle, double min, 
+                                 double max, double incr = 2*PI);
     
     Point to(const Point& target, double sep) const;
     Point towards(const Point& target, double ratio = .5) const;
@@ -46,6 +50,7 @@ public:
     friend Point& operator+=(Point& p1, const Point& p2);
     
     friend Point operator*(const Point& p, double scale);
+    friend Point operator*(double scale, const Point& p);
     friend Point& operator*=(Point& p, double scale);
     
     friend bool operator==(const Point& p1, const Point& p2);

@@ -39,8 +39,11 @@ public:
     /**
      * @brief Constructs a permutation from a range of integers.
      * 
-     * The range must represent a valid permutation as per 
-     * @link is_permutation . The values in the range are left as-is and are
+     * The range should represent a valid permutation as per 
+     * @link Permutation::is_permutation is_permutation @endlink. 
+     * No checks are made by this method; it is up to the user
+     * to ensure that the permutation is valid.
+     * The values in the range are left as-is and are
      * independent of the created permutation.
      * 
      * @tparam ForwardIt    a forward iterator whose @c value_type can be 
@@ -50,7 +53,6 @@ public:
      */
     template<class ForwardIt>
     Permutation(ForwardIt begin, ForwardIt end) : map() {
-        assert(is_permutation(begin, end));
         map.reserve(std::distance(begin, end));
         for(auto it = begin; it != end; ++it)
             map.push_back(*it);
@@ -90,7 +92,7 @@ public:
     Permutation inverse() const;
     
     /**
-     * Retrieves the size of the permutation, i.e. how many objects it permutes.
+     * @brief Retrieves the size of the permutation, i.e. how many objects it permutes.
      * @return the size.
      */
     size_t size() const { return map.size();  }
@@ -106,38 +108,56 @@ public:
     typedef std::vector<size_t>::const_reverse_iterator    reverse_iterator;
     
     /**
-     * Iterator to the beginning of the permutation.
+     * @brief Iterator to the beginning of the permutation.
      * @return a const iterator.
+     * 
+     * In order to avoid invalidating the permutation, all iterators
+     * to permutations are constant iterators.
      */
     iterator begin() const          {   return map.cbegin();   }
     /**
-     * Iterator to the end of the permutation.
+     * @brief Iterator to the end of the permutation.
      * @return a const iterator.
+     * 
+     * In order to avoid invalidating the permutation, all iterators
+     * to permutations are constant iterators.
      */
     iterator end() const            {   return map.cend();     }
     /**
-     * Reverse iterator to the beginning of the permutation.
+     * @brief Reverse iterator to the beginning of the permutation.
      * @return a const iterator.
+     * 
+     * In order to avoid invalidating the permutation, all iterators
+     * to permutations are constant iterators.
      */
     reverse_iterator rbegin() const {   return map.crbegin();  }
     /**
-     * Reverse iterator to the end of the permutation.
+     * @brief Reverse iterator to the end of the permutation.
      * @return a const iterator.
+     * 
+     * In order to avoid invalidating the permutation, all iterators
+     * to permutations are constant iterators.
      */
     reverse_iterator rend() const   {   return map.crend();    }
     
     /**
-     * The first index in the permutation.
+     * @brief The first index in the permutation.
      * @return a copy of the index.
+     * 
+     * In order to avoid invalidating the permutation, all iterators
+     * to permutations are constant iterators.
      */
     size_t front() const            {   return map.front();    }
     /**
-     * The last index in the permutation.
+     * @brief The last index in the permutation.
      * @return a copy of the index.
+     * 
+     * In order to avoid invalidating the permutation, all iterators
+     * to permutations are constant iterators.
      */
     size_t back() const             {   return map.back();     }
     /**
-     * Retrieves an index in the permutation.
+     * @brief Retrieves an index in the permutation.
      * @param i a value in the range [0, size() ).
      * @return a copy of the ith index.
      */
@@ -146,8 +166,8 @@ public:
     /**
      * @brief Applies a permutation to a collection of objects.
      * 
-     * The permutation is performed in-place, using @c std::swap or 
-     * @c std::swap_ranges to perform the permutation. The collection must have
+     * The permutation is performed in-place, using @link std::swap @endlink or 
+     * @link std::swap_ranges @endlink to perform the permutation. The collection must have
      * at least @code offset + block_len * size() @endcode elements.
      * 
      * @tparam RandAccIt a random access iterator type.
@@ -223,14 +243,17 @@ public:
      * @brief Creates a permutation that, when applied to a range, sorts it.
      * 
      * @tparam RandAccIt    a random access iterator type.
-     * @tparam Compare      a class that compares the values pointed to by @c RandAccIt.
+     * @tparam Compare      a class that compares the values pointed to by @p RandAccIt.
      * @param begin     an iterator to the beginning of the range.
      * @param end       an iterator past the end of the range.
      * @param comp      the comparator used for the sorting.
-     * @param offset    if provided, the permutation is offset (see @c permute ).
-     * @param block_len if provided, the permutation is performed block-wise (see @c permute).
+     * @param offset    if provided, the permutation is offset 
+     *                  (see @link Permutation::permute @endlink ).
+     * @param block_len if provided, the permutation is performed block-wise 
+     *                  (see @link Permutation::permute @endlink).
      * @param require_stable    if @c true, the sort is guaranteed to be stable by
-     *                          invoking @c std::stable_sort rather than @c std::sort.
+     *                          invoking @link std::stable_sort @endlink 
+     *                          rather than @link std::sort @endlink.
      *                          Defaults to @c false.
      * 
      * @return      a permutation such that 
@@ -239,7 +262,8 @@ public:
      *  @code std::sort(begin, end, comp) @endcode
      * 
      * The range is not modified by this operation. The time complexity is the same as
-     * using @c std::sort (@c std::stable_sort), but supports offset and block-wise sorting.
+     * using @link std::sort @endlink (@link std::stable_sort @endlink), but supports 
+     * offset and block-wise sorting.
      */
     template<class RandAccIt, class Compare>
     Permutation sorting_permutation(
@@ -265,8 +289,9 @@ public:
     }
     
     /**
-     * @brief Acts like the other method of the same name, but with @c operator<
-     * rather than a custom comparator.
+     * @brief Acts like 
+     * @link Propagator::sorting_permutation the other method of the same name @endlink, 
+     * but with @c operator< rather than a custom comparator.
      */
     template<class RandAccIt>
     static Permutation sorting_permutation(

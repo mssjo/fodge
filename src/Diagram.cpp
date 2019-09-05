@@ -77,10 +77,8 @@ bool Diagram::is_zero(){
  * diagrams is sorted.
  */
 std::vector< Diagram > Diagram::generate ( int order, int n_legs, 
-                                           bool singlets, bool traceless_generators, 
-                                           bool debug )
+                        bool singlets, bool traceless_generators, bool debug )
 {
-    //TODO: catch invalid input
     
     auto diagrs = std::vector<Diagram>();
     //Generates single-vertex diagrams to seed the recursion.
@@ -353,6 +351,21 @@ void Diagram::label(){
     labellings.resize(std::distance( labellings.begin(), last));
 }
 
+/**
+ * @brief Extends a diagram by attaching vertices to its external legs.
+ * 
+ * @param new_verts a list of vertices to be attached.
+ * @param singlets enables singlet propagators.
+ * @param debug enables debug messages.
+ * @return a vector containing diagrams representing all ways to attach 
+ * the new vertices to legs of the diagram.
+ * 
+ * This method is central to the diagram generation process. In order to
+ * reduce the number of redundant diagrams, only legs that, in some
+ * distinct labelling of the diagram, carry a label that is a coset
+ * representative under @f$  Z_R,@f$ are extended. The generated
+ * diagrams are completely set up and labelled.
+ */
 std::vector<Diagram> Diagram::extend(
     const std::vector<vertex>& new_verts, bool singlets, bool debug)
 {
@@ -391,6 +404,21 @@ std::vector<Diagram> Diagram::extend(
     return diagrs;
 }
 
+/**
+ * @brief Attaches a vertex to a leg of a diagram in all distinct ways.
+ * 
+ * @param new_vert the vertex to be attached.
+ * @param where the location in the diagram of the leg. It is given as a
+ * vector of (trace, index) pairs specifying a traversal down the tree of nodes.
+ * @param diagrs the list of diagrams to which the new diagrams are added.
+ * @param singlet enables attaching the leg via a singlet propagator.
+ * @param debug enables debug printouts.
+ *
+ * This method serves as an auxiliary to @link Diagram::attach @endlink.
+ * Several diagrams are generated: different choices of vertex leg to attach,
+ * and singlet/ordinary propagator. The generated diagrams are completely set
+ * up and labelled.
+ */
 void Diagram::attach(
     const vertex& new_vert,
     const std::vector<std::pair<int,int> >& where, 
@@ -478,7 +506,25 @@ size_t Diagram::filter_flav_split(std::vector<Diagram>& diagrs,
 }
 
 
-
+/**
+ * @brief Generates a list of all valid flavour splits of a given vertex.
+ * 
+ * @param order the order of the vertex.
+ * @param n_legs the number of legs on the vertex.
+ * @param smallest_split the smallest split to be allowed. Should only be used
+ * when the method calls itself recursively.
+ * @return a vector of flavour splits, i.e. sorted vectors of integers that
+ * add up to @p n_legs.
+ * 
+ * The splittings are generated recursively: for each possible first entry
+ * in the split, all valid splits of the remainder are generated. To keep
+ * the splits sorted, @p smallest_split is used to ensure that no integer
+ * is smaller than one preceding it.
+ * 
+ * The rules for flavour splits, as read from the NLSM Lagrangian, is that
+ * each additional entry in a split "costs" @f$ \mathcal O(p^2)@f$, and each 
+ * pair of odd splits cost an additional @f$ \mathcal O(p^2)@f$.
+ */
 std::vector<std::vector<int>> Diagram::valid_flav_splits(
     int order, int n_legs, int smallest_split)
 {
@@ -491,8 +537,10 @@ std::vector<std::vector<int>> Diagram::valid_flav_splits(
        
     int step = order > 4 ? 1 : 2;
     for(int split = smallest_split; split <= n_legs/2; split += step){
+        //Extra cost for odd split is only deducted when n_legs is even,
+        //to ensure that it is only deducted once for each pair.
         for(auto& flav_split : valid_flav_splits(
-                order - 2*(1 + split%2), n_legs - split, split))
+                order - (split%2 && !(n_legs%2) ? 4 : 2), n_legs - split, split))
         {
             flav_split.push_back(split);
             flav_splits.push_back(flav_split);
@@ -502,6 +550,14 @@ std::vector<std::vector<int>> Diagram::valid_flav_splits(
     return flav_splits;
 }
 
+/**
+ * @brief Generates all valid vertices of a given order and size.
+ * 
+ * @param order the order of the vertices.
+ * @param n_legs the number of legs on the vertices.
+ * @return a vector containing all valid vertices according to the rules
+ * described in @link Diagram::valid_flav_splits @endlink.
+ */
 std::vector<vertex> Diagram::valid_vertices(int order, int n_legs){
     auto vertices = std::vector<vertex>();
     

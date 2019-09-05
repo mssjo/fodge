@@ -7,14 +7,34 @@
 
 #include "Propagator.hpp"
 
-Propagator::Propagator() : momenta(0), src_order(0), dst_order(0), n_mom(0) {};
-
+/**
+ * @brief Constructs an ordinary propagator.
+ * 
+ * @param momenta the momenta it carries.
+ * @param n_mom the total number of momenta in the diagram.
+ * @param src_order the source vertex order.
+ * @param dst_order the destination vertex order.
+ * 
+ * The resulting propagator will be normalised. 
+ */
 Propagator::Propagator(mmask momenta, int n_mom, 
         int src_order, 
-        int dest_order) 
-: Propagator(momenta, n_mom, src_order, 0, dest_order, 0)
+        int dst_order) 
+: Propagator(momenta, n_mom, src_order, 0, dst_order, 0)
 {}
 
+/**
+ * @brief Constructs a singlet propagator.
+ * 
+ * @param momenta the momenta it carries.
+ * @param n_mom the total number of momenta in the diagram.
+ * @param src_order the source vertex order.
+ * @param src_prev  the momenta of the previous vertex leg at source.
+ * @param dst_order the destination vertex order.
+ * @param dst_prev  the momenta of the previous vertex leg at dest.
+ * 
+ * The resulting propagator will be normalised. 
+ */
 Propagator::Propagator(mmask momenta, int n_mom,
             int src_order, mmask src_prev, 
             int dst_order, mmask dst_prev)
@@ -26,6 +46,15 @@ Propagator::Propagator(mmask momenta, int n_mom,
     normalise();
 }
 
+/**
+ * @brief Constructs a propagator resulting from applying a permutation
+ * to the momentum indices of another propagator.
+ * 
+ * @param orig the original propagator.
+ * @param cycl the permutaton, must have size equal to @c n_mom.
+ * 
+ * The resulting propagator will be normalised.
+ */
 Propagator::Propagator(const Propagator& orig, 
         const permute::Permutation& cycl) 
 : momenta(cycl.permute_bits(orig.momenta)), 
@@ -37,6 +66,19 @@ Propagator::Propagator(const Propagator& orig,
     normalise();
 }
 
+/**
+ * @brief Normalises a propagator so that all its momenta are in a 
+ * canonical form under conservation of momentum.
+ * 
+ * By COM, a propagator carrying a set of momenta is equivalent to
+ * a propagator carrying the complementary set of momenta going in
+ * the opposite direction. There therefore exists an ambiguity between
+ * the set and its complement.
+ * 
+ * The canonical form is that in which the set contains the fewest
+ * momenta, and if it contains exactly half the momenta, the one
+ * not containing the momentum with the highest index is chosen.
+ */
 void Propagator::normalise(){
     mmask last_mask = 1 << (n_mom-1);
     mmask all_mask = (1 << n_mom) - 1;
@@ -52,6 +94,14 @@ void Propagator::normalise(){
     }
 }
 
+/**
+ * @brief Auxiliary method to @link Propagator::normalise @endlink.
+ * 
+ * @param m a bitmask representing a set of momenta.
+ * @param last_mask a bitmask representing the highest-indexed momentum.
+ * @param all_mask a bitmask representing the set of all momenta.
+ * @return @p m or its complement, depending on which is the canonical form.
+ */
 mmask Propagator::normalise_mmask(mmask m, mmask last_mask, mmask all_mask)
 const {
     int count = bitwise::bitcount(m);
@@ -60,8 +110,19 @@ const {
     return m;
 }
 
+/**
+ * @brief Compares two propagators for sorting purposes.
+ * 
+ * @param p1 the first propagator.
+ * @param p2 the second propagator.
+ * @return @c true if @p p1 should precede @p p2, @c false otherwise.
+ * 
+ * The comparison is rather arbitrary, as long as it is consistent.
+ * It is done order before previous-leg momenta before propagator momenta,
+ * source before destination.
+ */
 bool operator<(const Propagator& p1, const Propagator& p2){
-    
+
     if(p1.src_order != p2.src_order)
         return p1.src_order < p2.src_order;
     if(p1.dst_order != p2.dst_order)
@@ -74,6 +135,14 @@ bool operator<(const Propagator& p1, const Propagator& p2){
     return p1.momenta < p2.momenta;
 }
 
+
+/**
+ * @brief Compares two propagators for equality.
+ * 
+ * @param p1 the first propagator.
+ * @param p2 the other propagator.
+ * @return @c true if and only if they are completely identical.
+ */
 bool operator==(const Propagator& p1, const Propagator& p2){
     return (p1.momenta == p2.momenta) 
             && (p1.src_order == p2.src_order) 
@@ -81,10 +150,24 @@ bool operator==(const Propagator& p1, const Propagator& p2){
             && (p1.src_prev == p2.src_prev)
             && (p1.dst_prev == p2.dst_prev);
 }
-#define HI_CHAR 'X'
-#define LO_CHAR '.'
+
+/**
+ * @brief Prints a compact representation of a propagator.
+ * 
+ * @param out the stream to which the propagator should be printed.
+ * @param p the propagator.
+ * @return the stream.
+ * 
+ * The propagator is printed with X's and .'s representing the 1's and
+ * 0's of the momentum mask. The source and destination orders are printed
+ * as @code (src -> dest) @endcode, with previous-leg momenta written
+ * in brackets if needed.
+ */
 std::ostream& operator<<(std::ostream& out, const Propagator& p){
     bool print_prev = p.src_prev || p.dst_prev;
+    
+#define HI_CHAR 'X'
+#define LO_CHAR '.'
     
     bitwise::print_bits(p.momenta, p.n_mom, out, HI_CHAR, LO_CHAR);
     
@@ -105,6 +188,11 @@ std::ostream& operator<<(std::ostream& out, const Propagator& p){
     return out;
 }
 
+/**
+ * @brief Prints a header matching the printouts as an aid when reading them.
+ * 
+ * @param out the stream to which the header should be printed.
+ */
 void Propagator::print_header(std::ostream& out) const {
     bool print_prev = src_prev || dst_prev;
     int w = 0;

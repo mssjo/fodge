@@ -10,9 +10,28 @@
 
 #include "fodge.hpp"
 
+/**
+ * @brief Represents a propagator for the purposes of uniquely specifying
+ * kinematic structures.
+ * 
+ * For a labelling on a flavour-ordered diagram, the kinematic structure is
+ * uniquely determined by
+ * <ul>
+ *  <li> for @f$\mathcal O(p^2)@f$: the list of propagator momenta.
+ *  <li> for higher-order non-singlet diagrams: the list of propagator momenta,
+ *       plus the vertex orders at each end of each propagator, plus knowledge
+ *       of the flavour split of the diagram.
+ *  <li> for singlet diagrams: the above, plus the momentum on another vertex
+ *       leg adjacent to each singlet propagator. We choose the leg preceding
+ *       the propagator in the list of legs on a @link DiagramNode node @endlink.
+ * </ul>
+ * this information is supplied by this class. Importantly, momenta are normalised
+ * to a canonical form under conservation of momentum so that well-defined
+ * comparisons can be made.
+ */
 class Propagator {
 public:
-    Propagator();
+    Propagator() = default;
     Propagator(mmask momenta, int n_mom, 
         int src_order, 
         int dst_order);
@@ -35,12 +54,18 @@ private:
     void normalise();
     mmask normalise_mmask(mmask m, mmask last_mask, mmask all_mask) const;
 
+    /** Bitmask storing the momentum indices carried by the propagator. */
     mmask momenta;
+    /** Total number of momenta in the containing diagram. */
     int n_mom;
     
+    /** Order of the "source" vertex (momentum flowing out) */
     int src_order;
+    /** Momenta carried by adjacent vertex leg at source, used by singlets */
     mmask src_prev;
+    /** Order of the "destination" vertex (momentum flowing in) */
     int dst_order;
+    /** Momenta carried by adjacent vertex leg at dest, used by singlets */
     mmask dst_prev;
 };
 
