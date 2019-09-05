@@ -33,29 +33,36 @@ public:
     
     bool is_zero();
     
-    static std::vector<Diagram> generate(int order, int n_legs, 
-        bool singlets, bool traceless_generators = true);
-    std::vector<Diagram> extend(
-        const std::vector<vertex>& new_verts, bool singlets);
+    static std::vector<Diagram> generate(int order, int n_legs,
+                                         bool singlets, bool traceless_generators = true, 
+                                         bool debug = false);
+    std::vector<Diagram> extend(const std::vector<vertex>& new_verts, 
+                                bool singlets, bool debug);
     void attach(const vertex& new_vert,
-        const std::vector<std::pair<int, int> >& where,
-        std::vector<Diagram>& diagrs, bool singlet) const;
+                const std::vector<std::pair<int, int> >& where,
+                std::vector<Diagram>& diagrs, bool singlet, bool debug) const;
     
     friend bool operator<(const Diagram& d1, const Diagram& d2);
     friend bool operator==(const Diagram& d1, const Diagram& d2);
     
+   static size_t filter_flav_split(std::vector<Diagram>& diagrs, 
+                                  const std::vector<std::vector<int>>& filter, 
+                                  bool include);
+    
     friend std::ostream& operator<<(std::ostream& out, const Diagram& d);
+    static void summarise(std::ostream& out, const std::vector<Diagram>& diagrs);
     
     void TikZ(std::ostream& tikz, double radius = 0, int idx = -1) const;
-    void FORM(std::ostream& form, std::map<vertex, int>& verts) const;
-    static void FORM(std::string filename, const std::vector<Diagram> diagrs);
+    static int TikZ(const std::string& filename, const std::vector<Diagram>& diagrs,
+                    int split, double radius);
+    
+    void FORM(std::ostream& form, std::map<vertex, int>& verts, int index) const;
+    void diagram_name_FORM(std::ostream& form, int index) const;
+    static int FORM(const std::string& filename, const std::vector<Diagram>& diagrs);
     
 private:
     friend class Labelling;
-    
-    /** The root node of the tree. */
-    DiagramNode root;
-    
+        
     /** The total order (as in O(p^...) ) of the diagram. */
     int order;
     /** The total number of legs on the diagram. */
@@ -64,9 +71,13 @@ private:
      *  integers, each representing the number of indices in a trace in the
      *  flavour structure. The integers must sum to @c n_legs . */
     std::vector<int> flav_split;
+    bool singlet_diagram;
+    
+    /** The root node of the tree. */
+    DiagramNode root;
     
     /** All independent flavour-ordered labelings of the legs of the diagram. */
-    std::vector<Labelling> labelings;
+    std::vector<Labelling> labellings;
     
     void find_flav_split();
     void index();

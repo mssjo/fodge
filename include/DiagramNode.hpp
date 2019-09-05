@@ -41,10 +41,12 @@ public:
         std::vector<Diagram>& diagrs, const std::vector<vertex>& new_verts,
         std::unordered_set<int>& idcs, 
         std::vector<std::pair<int, int> >& traversal, 
-        const Diagram& original, bool singlet);
+        const Diagram& original, 
+        bool singlet, bool debug);
     void attach(
         const vertex& new_vert, int split_idx,
-        const std::vector<std::pair<int,int> >& where, int depth, bool singlet);
+        const std::vector<std::pair<int,int> >& where, int depth, 
+        bool singlet, bool debug);
        
     
     //Methods for drawing diagrams (implemented in TikZ.cpp)
@@ -70,9 +72,12 @@ public:
     
     void FORM(std::ostream& form, std::map<vertex, int>& verts, 
         int depth, const Propagator& prop) const;
-    static void vertex_name_FORM(std::ostream& form, vertex vert, 
-        int index);
-                
+        
+    static void vertex_name_FORM(std::ostream& form, const vertex& vert, 
+        int index, bool vertid);
+    static void vertices_FORM(std::ostream& form, std::map<vertex, int>& verts);
+    static bool heavy_vertex(const vertex& vert);
+    
 private:
     int order;
     int n_legs;

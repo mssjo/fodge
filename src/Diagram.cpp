@@ -9,6 +9,8 @@
 
 #include "Diagram.hpp"
 
+#include <sstream>
+
 /** 
  * @brief Default constructor.
  * 
@@ -24,16 +26,16 @@ Diagram::Diagram() : Diagram(2, std::vector<int>(1,4)) {};
  * 
  * Creates the unique single-vertex diagram with the given properties. 
  * No constructor (other than the copy constructor) exists for other diagrams;
- * these are instead created form other diagrams via the @link extend @endlink
+ * these are instead created form other diagrams via the @link Diagram::extend @endlink
  * method.
  */
 Diagram::Diagram(int order, const std::vector<int>& fsplit)
-: order(order), flav_split(fsplit), root(order, fsplit), labelings(),
+: order(order), flav_split(fsplit), singlet_diagram(false), root(order, fsplit), labellings(),
         n_legs(std::accumulate(fsplit.begin(), fsplit.end(), 0))
 {
     std::sort(flav_split.begin(), flav_split.end());
     index();
-    labelings.push_back(Labelling(root, n_legs));
+    labellings.push_back(Labelling(root, n_legs));
 }
 
 /**
@@ -60,9 +62,12 @@ bool Diagram::is_zero(){
  * @param order         the order of the diagrams.
  * @param n_legs        the number of legs on the diagrams.
  * @param singlets      whether to include singlet diagrams.
- * @param remove_zero   whether to remove diagrams that are identically zero -
+ * @param traceless_generators 
+ *                      whether to remove diagrams that are identically zero 
+ *                      due to traceless generators --
  *                      should normally only be @c false when the method calls
  *                      itself.
+ * @param debug         enables debug printouts.
  * @return  a sorted vector containing the diagrams.
  * 
  * This is the main method for creating diagrams. It works by generating all
@@ -71,16 +76,20 @@ bool Diagram::is_zero(){
  * size and order. Finally, redundant diagrams are trimmed and the list of
  * diagrams is sorted.
  */
-std::vector<Diagram> Diagram::generate(int order, int n_legs, 
-            bool singlets, bool remove_zero){
+std::vector< Diagram > Diagram::generate ( int order, int n_legs, 
+                                           bool singlets, bool traceless_generators, 
+                                           bool debug )
+{
     //TODO: catch invalid input
     
     auto diagrs = std::vector<Diagram>();
     //Generates single-vertex diagrams to seed the recursion.
     for(auto& flav_split : valid_flav_splits(order, n_legs)){
         
-//        std::cout << "Generating diagram with flavour split " 
-//                << flav_split << std::endl;
+        if(debug){
+            std::cout << "Generating diagram with flavour split " 
+                    << flav_split << std::endl;
+        }
         
         diagrs.push_back(Diagram(order, flav_split));
     }
@@ -96,12 +105,13 @@ std::vector<Diagram> Diagram::generate(int order, int n_legs,
     for(int o = order; o > order/2; o -= 2){
         int n_min = (n_legs <= 8 || 2*o != 2+order) ? 4 : n_legs/2;
         for(int n = n_legs - 2; n >= n_min; n -= 2){
-            for(Diagram& d : generate(o, n, singlets, false)){
-                std::cout << "Extending " << d;
+            for(Diagram& d : generate(o, n, singlets, false, debug)){
+                if(debug)
+                    std::cout << "Extending " << d;
                 
                 auto d_ext 
                     = d.extend(valid_vertices(2 + order - o, 2 + n_legs - n), 
-                        singlets && (o > 2) && (order > 4));
+                        singlets && (o > 2) && (order > 4), debug);
                 diagrs.insert(diagrs.end(), d_ext.begin(), d_ext.end());
             }
         }
@@ -114,7 +124,7 @@ std::vector<Diagram> Diagram::generate(int order, int n_legs,
     diagrs.resize(std::distance(diagrs.begin(), last));
     
     //Removes identically zero diagrams
-    if(remove_zero){
+    if( traceless_generators ){
         auto nonzero = std::vector<Diagram>();
         for(Diagram& d : diagrs){
             if(!d.is_zero())
@@ -156,7 +166,7 @@ bool operator<(const Diagram& d1, const Diagram& d2){
     if(d1.flav_split != d2.flav_split)
         return d1.flav_split > d2.flav_split;
     
-    return d1.labelings < d2.labelings;
+    return d1.labellings < d2.labellings;
 }
 
 /**
@@ -169,18 +179,30 @@ bool operator<(const Diagram& d1, const Diagram& d2){
 bool operator==(const Diagram& d1, const Diagram& d2){
     return (d1.n_legs == d2.n_legs) && (d1.order == d2.order)
             && (d1.flav_split == d2.flav_split) 
-            && (d1.labelings == d2.labelings);
+            && (d1.labellings == d2.labellings );
 }
 
+
+/**
+ * @brief Left-shift print operator for diagrams.
+ * 
+ * @param out the stream to which the diagram is printed.
+ * @param d   the diagram to print.
+ * @return the stream.
+ * 
+ * The diagram is presented as 
+ * @code O(p^<m>) <n>-point diagram, flavour split <fsp>, <k> distinct labellings @endcode,
+ * with values inserted to represent the diagram. A list of labellings then follows.
+ */
 std::ostream& operator<<(std::ostream& out, const Diagram& d){
     out     << "O(p^" << d.order << ") " 
             << d.n_legs << "-point diagram"
             << ", flavour split " << d.flav_split
-            << ", " << d.labelings.size() << " distinct labelings"
+            << ", " << d.labellings.size() << " distinct labellings"
             << ":\n\t";
     
-    d.labelings.front().print_header(out);
-    for(Labelling lbl : d.labelings)
+    d.labellings.front().print_header(out);
+    for(Labelling lbl : d.labellings )
         out << "\n\t" << lbl;
     
     out << std::endl;
@@ -188,6 +210,99 @@ std::ostream& operator<<(std::ostream& out, const Diagram& d){
     return out;
 }
 
+/**
+ * @brief Makes a table summarising a list of diagrams.
+ * 
+ * @param out the stream to which the table is printed.
+ * @param diagrs the diagrams.
+ * 
+ * The table lists the number of diagrams per flavour structure,
+ * and the number of singlet diagrams if such are present.
+ */
+void Diagram::summarise(std::ostream& out, const std::vector<Diagram>& diagrs)
+{
+    if(diagrs.empty())
+        return;
+    
+    std::map<std::vector<int>, std::pair<size_t, size_t> > counts = {};
+        
+    bool any_singlets = false;
+    size_t max_count = 0, max_fsp_len = 0;
+    
+    //Counts the number of diagrams in (non-singlet, singlet) pairs
+    //mapped over flavour structures
+    //Also keeps track of maximum lengths for formatting purposes
+    auto flav_split = diagrs.front().flav_split;
+    auto count = std::make_pair(0, 0);
+    for(size_t i = 0;; i++){
+        if(i >= diagrs.size() || diagrs[i].flav_split != flav_split){
+            size_t fsp_len = flav_split.size() + 3;
+            for(int r : flav_split)
+                fsp_len += std::to_string(r).length();
+            if(fsp_len > max_fsp_len)
+                max_fsp_len = fsp_len;
+            
+            counts.insert({flav_split, count});
+            
+            if(i < diagrs.size()){
+                flav_split = diagrs[i].flav_split;
+                count = std::make_pair(0, 0);
+            }
+            else
+                break;
+        }
+        
+        if(diagrs[i].singlet_diagram){
+            count.second++;
+            any_singlets = true;
+        }
+        else{
+            count.first++;
+            if(count.first > max_count)
+                max_count = count.first;
+        }
+    }
+    
+    std::string col1("Flavour split"), col2("Diagrams"), col3("Singlets");
+    size_t w1 = std::max(col1.length(), max_fsp_len);
+    size_t w2 = std::max(col2.length(), std::to_string(max_count).length());
+    
+    //Horizontal line in the table -- three are needed so we make a macro
+#define TABLE_HLINE     out << std::string(w1, '-') << "-+-" << std::string(w2, '-'); \
+                        if(any_singlets) out << "-+-" << std::string(w2, '-');        \
+                        out << "-\n";
+                        
+    TABLE_HLINE
+    
+    out << std::setw(w1) << col1 << " | " 
+        << std::setw(w2) << col2;
+    if(any_singlets)
+        out << " | " << col3;
+    out << "\n";
+    
+    TABLE_HLINE
+    
+    for(auto& key_val : counts){
+        std::ostringstream fsp_str;
+        fsp_str << key_val.first;        
+        
+        out << std::setw(w1) << fsp_str.str() << std::setw(0) << " | "
+            << std::setw(w2) << key_val.second.first + key_val.second.second << std::setw(0);
+        if(any_singlets)
+            out << " | " << std::setw(w2) << key_val.second.second << std::setw(0);
+        out << "\n";
+    }
+    
+    TABLE_HLINE
+}
+
+
+/**
+ * @brief Determines the flavour split of a diagram.
+ * 
+ * This method is necessary for a diagram to know its own
+ * number of legs and flavour split after being generated.
+ */
 void Diagram::find_flav_split(){
     flav_split.clear();
     
@@ -195,10 +310,16 @@ void Diagram::find_flav_split(){
     std::sort(flav_split.begin(), flav_split.end());
     
     n_legs = std::accumulate(flav_split.begin(), flav_split.end(), 0);
-    
-    std::cout << "\t\tDetermined flavour split: " << flav_split << std::endl;
 }
 
+/**
+ * @brief Places flavour indices on the legs of a diagram.
+ * 
+ * The indices will be placed in an arbitrary flavour-ordered
+ * way. This is necessary for @link Diagram::label @endlink
+ * to work properly, and requires @link Diagram::find_flav_split @endlink
+ * in turn.
+ */
 void Diagram::index(){
     
     std::list<std::pair<int, int>> flav_split_idcs 
@@ -213,21 +334,27 @@ void Diagram::index(){
     root.index(flav_split_idcs);
 }
 
+/**
+ * @brief Generates all distinct labellings on a diagram.
+ * 
+ * After calling this method, a diagram is complete. It
+ * requires @link Diagram::index @endlink to work correctly.
+ */
 void Diagram::label(){
-    labelings.clear();
-    labelings.push_back(Labelling(root, n_legs));
+    labellings.clear();
+    labellings.push_back(Labelling(root, n_legs));
         
     for(permute::ZR_Generator zr(flav_split); zr; ++zr)        
-        labelings.push_back(Labelling(labelings.front(), *zr));
+        labellings.push_back(Labelling( labellings.front(), *zr));
         
-    std::sort(labelings.begin(), labelings.end());
+    std::sort( labellings.begin(), labellings.end());
     std::vector<Labelling>::iterator last 
-            = std::unique(labelings.begin(), labelings.end());
-    labelings.resize(std::distance(labelings.begin(), last));
+            = std::unique( labellings.begin(), labellings.end());
+    labellings.resize(std::distance( labellings.begin(), last));
 }
 
 std::vector<Diagram> Diagram::extend(
-    const std::vector<vertex>& new_verts, bool singlets)
+    const std::vector<vertex>& new_verts, bool singlets, bool debug)
 {
     
     //A vector of representatives taken from each equivalence class of indices
@@ -246,19 +373,20 @@ std::vector<Diagram> Diagram::extend(
     //All locations in the diagram where, in some labeling, an index
     //representative occurs, are marked as distinct places to put a new vertex.
     auto rep_locs = std::unordered_set<int>();
-    for(Labelling& lbl : labelings){
+    for(Labelling& lbl : labellings ){
         auto idx_loc = lbl.index_locations();
         for(int rep : idx_reps)
             rep_locs.insert(idx_loc[rep]);
     }
     
-    std::cout << "\tAttaching extension to legs " << rep_locs << std::endl;
+    if(debug)
+        std::cout << "\tAttaching extension to legs " << rep_locs << std::endl;
     
     //Traverses the diagram and attaches all new vertices at all marked 
     //locations
     auto diagrs = std::vector<Diagram>();
     auto traversal = std::vector<std::pair<int,int>>();
-    root.extend(diagrs, new_verts, rep_locs, traversal, *this, singlets);
+    root.extend(diagrs, new_verts, rep_locs, traversal, *this, singlets, debug);
         
     return diagrs;
 }
@@ -266,7 +394,8 @@ std::vector<Diagram> Diagram::extend(
 void Diagram::attach(
     const vertex& new_vert,
     const std::vector<std::pair<int,int> >& where, 
-    std::vector<Diagram>& diagrs, bool singlet)
+    std::vector<Diagram>& diagrs, 
+    bool singlet, bool debug)
 const {
     for(int i = 0; i < new_vert.second.size(); i++){
         if(i > 0 && new_vert.second[i] == new_vert.second[i-1])
@@ -275,14 +404,18 @@ const {
         Diagram d(*this);
         d.order += new_vert.first - 2;
         
-        std::cout   << "\tAttaching O(p^" << new_vert.first 
-                    << ") vertex with flavour split " << new_vert.second
-                    << " at location " << where << std::endl;
-        d.root.attach(new_vert, i, where, 0, false);
+        if(debug){
+            std::cout   << "\tAttaching O(p^" << new_vert.first 
+                        << ") vertex with flavour split " << new_vert.second
+                        << " at location " << where << std::endl;
+        }
+        d.root.attach(new_vert, i, where, 0, false, debug);
+        d.singlet_diagram = this->singlet_diagram;
         
         d.find_flav_split();
         d.index();
         d.label();
+        
         
         diagrs.push_back(d);
         
@@ -290,10 +423,13 @@ const {
             Diagram s(*this);
             s.order += new_vert.first - 2;
         
-            std::cout   << "\tSinglet-attaching O(p^" << new_vert.first 
-                        << ") vertex with flavour split " << new_vert.second
-                        << " at location " << where << std::endl;
-            s.root.attach(new_vert, i, where, 0, true);
+            if(debug){
+                std::cout   << "\tSinglet-attaching O(p^" << new_vert.first 
+                            << ") vertex with flavour split " << new_vert.second
+                            << " at location " << where << std::endl;
+            }
+            s.root.attach(new_vert, i, where, 0, true, debug);
+            s.singlet_diagram = true;
             
             s.find_flav_split();
             s.index();
@@ -303,6 +439,45 @@ const {
         }
     }
 }
+
+/**
+ * @brief Filters a list of diagrams based on their flavour structure.
+ * 
+ * @param diagrs    the diagrams, all of which should have the same number of legs. 
+ * @param filter    a vector of flavour splits: ascendingly sorted vectors of 
+ *                  integers larger than 1 that sum to the number of legs on the
+ *                  diagrams.
+ * @param include   if @c true, all diagrams that match the filter are kept, and
+ *                  all others are discarded. If @c false, the opposite happens.
+ * @return the number of diagrams removed. 
+ */
+size_t Diagram::filter_flav_split(std::vector<Diagram>& diagrs, 
+                                    const std::vector<std::vector<int> >& filter, 
+                                    bool include)
+{
+    auto tmp = std::vector<Diagram>();
+    size_t init_size = diagrs.size();
+    
+    for(Diagram& d : diagrs){
+        for(const std::vector<int>& flav_split : filter){
+            if(flav_split == d.flav_split){
+                if(include)            
+                    tmp.push_back(d);
+                
+                break;
+            }
+        }
+        if(!include)
+            tmp.push_back(d);
+    }
+    
+    diagrs.clear();
+    diagrs.insert(diagrs.cend(), tmp.begin(), tmp.end());
+    
+    return init_size - diagrs.size();
+}
+
+
 
 std::vector<std::vector<int>> Diagram::valid_flav_splits(
     int order, int n_legs, int smallest_split)

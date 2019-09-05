@@ -268,6 +268,8 @@ Permutation& operator^= (Permutation& p, size_t pow){
  * consistent choice, and guarantees that the identity permutation is returned
  * whenever possible.
  * 
+ * The implementation is rather brute-force and not very efficient.
+ * 
  * @param p1    the permutation to map to a unique equivalence class 
  *              representative.
  * @param p2    the permutation with respect to which the equivalence classes

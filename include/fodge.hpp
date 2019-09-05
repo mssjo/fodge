@@ -31,11 +31,14 @@
 #include "permute.hpp"
 #include "bitwise.hpp"
 
+#define FODGE_VERSION "FODGE version 2.0"
+
 #define PI 3.14159265358979
 
+/** Bitmask specifying a sum of some momenta 
+ *  (those whose indices correspond to 1-bits) */
 typedef uint32_t mmask;
-/** Simple container struct specifying a vertex. Could've just used a pair, 
- *  but this way we get member names! */
+/** An order-flavour split pair specifying a vertex. */
 typedef std::pair<int, std::vector<int>> vertex;
 
 /** Returns true if the 1-bits of a is a subset of the 1-bits of b. */

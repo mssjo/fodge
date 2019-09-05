@@ -1,8 +1,11 @@
 .gitignore
 old/
 output/
-build/
-CMakeLists.txt
-fodge.kdev4
+bin/
+doc/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+fodge.kdev*
 fodge
 *~

@@ -14,6 +14,14 @@
 #include "DiagramNode.hpp"
 #include "Permutation.hpp"
 
+
+/**
+ * @brief Describes labellings of flavour-ordered diagrams.
+ * 
+ * A labelling is a way to place indices on external legs in a flavour-ordered
+ * manner. A labelling is associated with 
+ * 
+ */
 class Labelling
  {
 public:
@@ -30,6 +38,8 @@ public:
     void print_header(std::ostream& out) const;
     
     permute::Permutation index_locations() const;
+    
+    void FORM(std::ostream& form) const;
 
 private:
     void normalise();

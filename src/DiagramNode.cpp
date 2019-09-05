@@ -27,7 +27,7 @@ DiagramNode::FlavourTrace::FlavourTrace(int n_legs, bool connected)
 DiagramNode::DiagramNode() 
 : order(0), n_legs(0), momenta(0), 
         is_leaf(true), is_root(false), is_singlet(false),
-        traces(), connect_idx(-1)
+        connect_idx(-1), traces()
 {}
 
 /**
@@ -36,9 +36,9 @@ DiagramNode::DiagramNode()
  * @param flav_split    the flavour split, must be sorted.
  */
 DiagramNode::DiagramNode(int order, const std::vector<int>& flav_split) 
-: order(order), momenta(0), n_legs(0), 
+: order(order), n_legs(0), momenta(0), 
         is_leaf(false), is_root(true), is_singlet(false), 
-        traces(), connect_idx(-1)
+        connect_idx(-1), traces()
 {    
     for(int fsp : flav_split){
         traces.push_back(FlavourTrace(fsp, false));
@@ -58,9 +58,9 @@ DiagramNode::DiagramNode(int order, const std::vector<int>& flav_split)
 DiagramNode::DiagramNode(
         int order, const std::vector<int>& flav_split, 
         int split_idx, bool singlet)
-: order(order), momenta(0), n_legs(0),
+: order(order), n_legs(0), momenta(0),
         is_leaf(false), is_root(false), is_singlet(singlet),
-        traces(), connect_idx(split_idx)
+        connect_idx(split_idx), traces()
 {
         
     int split_size;
@@ -247,7 +247,8 @@ void DiagramNode::label(std::vector<Propagator>& props, int n_idcs,
 void DiagramNode::extend(
     std::vector<Diagram>& diagrs, const std::vector<vertex>& new_verts, 
     std::unordered_set<int>& idcs, std::vector<std::pair<int, int> >& traversal, 
-    const Diagram& original, bool singlet)
+    const Diagram& original, 
+    bool singlet, bool debug)
 {
     if(is_leaf){
         int index = bitwise::unshift(momenta);
@@ -257,7 +258,7 @@ void DiagramNode::extend(
 
         for(vertex v : new_verts){           
             original.attach(v, traversal, diagrs, 
-                    singlet && (v.first > 2));
+                    singlet && (v.first > 2), debug);
         }
         
         return;
@@ -268,7 +269,7 @@ void DiagramNode::extend(
     for(FlavourTrace& tr : traces){
         for(DiagramNode& leg : tr.legs){
             leg.extend(diagrs, new_verts, idcs, traversal, original, 
-                    singlet && (!leg.is_leaf || order > 2)
+                    singlet && (!leg.is_leaf || order > 2), debug
             );
             traversal.back().second++;
         }
@@ -281,12 +282,13 @@ void DiagramNode::extend(
 
 void DiagramNode::attach(
     const vertex& new_vert, int split_idx, 
-    const std::vector<std::pair<int,int> >& where, int depth, bool singlet)
+    const std::vector<std::pair<int,int> >& where, int depth, 
+    bool singlet, bool debug)
 {
     auto wd = where[depth];
     if(depth < where.size() - 1){
         traces[wd.first].legs[wd.second]
-            .attach(new_vert, split_idx, where, depth+1, singlet);
+            .attach(new_vert, split_idx, where, depth+1, singlet, debug);
     }
     else{
         traces[wd.first].legs[wd.second] 
