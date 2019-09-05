@@ -219,6 +219,77 @@ public:
         return res;
     }
     
+    /**
+     * @brief Creates a permutation that, when applied to a range, sorts it.
+     * 
+     * @tparam RandAccIt    a random access iterator type.
+     * @tparam Compare      a class that compares the values pointed to by @c RandAccIt.
+     * @param begin     an iterator to the beginning of the range.
+     * @param end       an iterator past the end of the range.
+     * @param comp      the comparator used for the sorting.
+     * @param offset    if provided, the permutation is offset (see @c permute ).
+     * @param block_len if provided, the permutation is performed block-wise (see @c permute).
+     * @param require_stable    if @c true, the sort is guaranteed to be stable by
+     *                          invoking @c std::stable_sort rather than @c std::sort.
+     *                          Defaults to @c false.
+     * 
+     * @return      a permutation such that 
+     *  @code sorting_permutation(begin, end, comp).permute(begin, end) @endcode
+     *  yields the same result as
+     *  @code std::sort(begin, end, comp) @endcode
+     * 
+     * The range is not modified by this operation. The time complexity is the same as
+     * using @c std::sort (@c std::stable_sort), but supports offset and block-wise sorting.
+     */
+    template<class RandAccIt, class Compare>
+    Permutation sorting_permutation(
+        RandAccIt begin, RandAccIt end, Compare comp,
+        size_t offset = 0, size_t block_len = 1, bool require_stable = false)
+    {
+        size_t dist = (std::distance(begin, end) - offset)/block_len;       
+        Permutation sort(dist); 
+        
+        auto comparator = [&](const int& a, const int& b) {
+                        return comp(
+                            begin[(a + offset)*block_len], 
+                            begin[(b + offset)*block_len]
+                        );
+                    };
+        
+        if(require_stable)
+            std::stable_sort(sort.map.begin(), sort.map.end(), comparator);
+        else
+            std::sort(sort.map.begin(), sort.map.end(), comparator);
+        
+        return sort;
+    }
+    
+    /**
+     * @brief Acts like the other method of the same name, but with @c operator<
+     * rather than a custom comparator.
+     */
+    template<class RandAccIt>
+    static Permutation sorting_permutation(
+        RandAccIt begin, RandAccIt end,
+        size_t offset = 0, size_t block_len = 1, bool require_stable = true)
+    {
+        size_t dist = (std::distance(begin, end) - offset)/block_len;       
+        Permutation sort(dist); 
+        
+        auto comparator = [&](const int& a, const int& b) {
+                        return
+                            begin[(a + offset)*block_len] 
+                            < begin[(b + offset)*block_len];
+                    };
+        
+        if(require_stable)
+            std::stable_sort(sort.map.begin(), sort.map.end(), comparator);
+        else
+            std::sort(sort.map.begin(), sort.map.end(), comparator);
+        
+        return sort;
+    }
+    
     Permutation& permute (Permutation& p, 
             size_t offset = 0, size_t block_len = 1) const;
     
