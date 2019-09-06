@@ -17,7 +17,7 @@
  * For a labelling on a flavour-ordered diagram, the kinematic structure is
  * uniquely determined by
  * <ul>
- *  <li> for @f$\mathcal O(p^2)@f$: the list of propagator momenta.
+ *  <li> for @f$\\mathcal O(p^2)@f$: the list of propagator momenta.
  *  <li> for higher-order non-singlet diagrams: the list of propagator momenta,
  *       plus the vertex orders at each end of each propagator, plus knowledge
  *       of the flavour split of the diagram.

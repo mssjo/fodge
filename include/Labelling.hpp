@@ -31,7 +31,11 @@
 class Labelling
  {
 public:
-    Labelling();
+    /**
+     * @brief Default constructor.
+     * Generates an empty labelling.
+     */
+    Labelling() = default;
     Labelling (DiagramNode& root, int n_legs);
     Labelling (const Labelling& orig) = default;
     Labelling (const Labelling& orig, const permute::Permutation& cycl);

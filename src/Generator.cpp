@@ -49,7 +49,7 @@ Zn_Generator& Zn_Generator::operator++(){
 }
 
 /**
- * Constructs a Generator for @f$ \mathcal S_n @f$.
+ * Constructs a Generator for @f$ \\mathcal S_n @f$.
  * @param n the value of @f$ n @f$.
  */
 Sn_Generator::Sn_Generator(int n) 

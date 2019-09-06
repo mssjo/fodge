@@ -51,11 +51,11 @@ void print_TikZ_header(std::ostream& tikz){
  * @brief Makes Ti<i>k</i>Z representations of a collection of diagrams.
  * 
  * @param filename  the basic filename to use; the actual files will be named 
- *                  @code <filename>_tikz.tex @endcode.
+ *                  <tt> <i>filename</i>_tikz.tex </tt>.
  * @param diagrs    the diagrams to represent. They are assumed to have the 
  *                  same number of legs.
  * @param split     if positive, the utput is split up into several files 
- *                  (labelled @code <filename>_tikz_1.tex @endcode, etc.) 
+ *                  (labelled <tt> <i>filename</i>_tikz_1.tex </tt>, etc.) 
  *                  each containing @p split diagrams.
  * @param radius    if positive, this is the radius (in cm) used for the 
  *                  diagram drawings. Otherwise, a suitable radius is chosen 
@@ -562,7 +562,7 @@ Point DiagramNode::draw_TikZ(
  * @param parent_key the key (momentum mask) of this node's parent. 
  *                  Irrelevant for the root.
  * 
- * The number is formatted by the LaTeX command @code \ordidx @endcode, and is
+ * The number is formatted by the LaTeX command <tt> ordidx </tt>, and is
  * not drawn on leading-order vertices.
  * 
  * This method could be very simple, but is not for aesthetic reasons. In order

@@ -166,9 +166,9 @@ public:
     /**
      * @brief Applies a permutation to a collection of objects.
      * 
-     * The permutation is performed in-place, using @link std::swap @endlink or 
-     * @link std::swap_ranges @endlink to perform the permutation. The collection must have
-     * at least @code offset + block_len * size() @endcode elements.
+     * The permutation is performed in-place, using @c std::swap or 
+     * @c std::swap_ranges to perform the permutation. The collection must have
+     * at least <tt> offset + block_len * size() </tt> elements.
      * 
      * @tparam RandAccIt a random access iterator type.
      * @param iter      an iterator to the collection. 
@@ -209,7 +209,7 @@ public:
      * with the bits in an integer representing the objects. The least
      * significant bit is treated as the first object in the collection.
      * If the type is smaller than required by the method 
-     * (i.e. fewer than @code offset + block_len * size() @endcode bits),
+     * (i.e. fewer than <tt> offset + block_len * size() </tt> bits),
      * the input will be treated as extended with zeroes and no error will 
      * occur.
      * 
@@ -243,7 +243,8 @@ public:
      * @brief Creates a permutation that, when applied to a range, sorts it.
      * 
      * @tparam RandAccIt    a random access iterator type.
-     * @tparam Compare      a class that compares the values pointed to by @p RandAccIt.
+     * @tparam Compare      a class that compares the values pointed to by 
+     *                      @p RandAccIt.
      * @param begin     an iterator to the beginning of the range.
      * @param end       an iterator past the end of the range.
      * @param comp      the comparator used for the sorting.
@@ -252,17 +253,17 @@ public:
      * @param block_len if provided, the permutation is performed block-wise 
      *                  (see @link Permutation::permute @endlink).
      * @param require_stable    if @c true, the sort is guaranteed to be stable by
-     *                          invoking @link std::stable_sort @endlink 
-     *                          rather than @link std::sort @endlink.
+     *                          invoking @c std::stable_sort 
+     *                          rather than @c std::sort.
      *                          Defaults to @c false.
      * 
      * @return      a permutation such that 
-     *  @code sorting_permutation(begin, end, comp).permute(begin, end) @endcode
+     *  <tt> sorting_permutation(begin, end, comp).permute(begin, end) </tt>
      *  yields the same result as
-     *  @code std::sort(begin, end, comp) @endcode
+     *  <tt> std::sort(begin, end, comp) </tt>
      * 
      * The range is not modified by this operation. The time complexity is the same as
-     * using @link std::sort @endlink (@link std::stable_sort @endlink), but supports 
+     * using @c std::sort (@c std::stable_sort), but supports 
      * offset and block-wise sorting.
      */
     template<class RandAccIt, class Compare>
@@ -289,8 +290,7 @@ public:
     }
     
     /**
-     * @brief Acts like 
-     * @link Propagator::sorting_permutation the other method of the same name @endlink, 
+     * @brief Acts like the other method of the same name,
      * but with @c operator< rather than a custom comparator.
      */
     template<class RandAccIt>

@@ -13,7 +13,7 @@
  * @param x     the x coordinate.
  * @param y     the y coordinate.
  * @param origin the point relative to which the coordinates are measured; 
- *              defaults to @code (0,0) @endcode.
+ *              defaults to <tt> (0,0) </tt>.
  */
 Point::Point(double x, double y, const Point& origin) 
     : _x(x + origin._x), _y(y + origin._y) 
@@ -25,7 +25,7 @@ Point::Point(double x, double y, const Point& origin)
  * @param radius the polar radius.
  * @param angle  the polar angle, in radians.
  * @param origin the point relative to which the coordinates are measured; 
- *               defaults to @code (0,0) @endcode.
+ *               defaults to <tt> (0,0) </tt>.
  * @return the point specified by the coordinates.
  */
 Point Point::polar(double radius, double angle, const Point& origin){
@@ -149,7 +149,7 @@ bool Point::collinear(const Point& a, const Point& b, const Point& c,
  * @brief Converts an angle in degrees to radians.
  * 
  * @param angle the angle.
- * @return the angle multiplied by @f$ \pi/180 @f$.
+ * @return the angle multiplied by @f$ \\pi/180 @f$.
  */
 double Point::deg_to_rad(double angle){
     return angle * PI/180;
@@ -158,16 +158,16 @@ double Point::deg_to_rad(double angle){
  * @brief Converts an angle in radians to degrees.
  * 
  * @param angle the angle.
- * @return the angle multiplied by @f$ 180/\pi @f$.
+ * @return the angle multiplied by @f$ 180/\\pi @f$.
  */
 double Point::rad_to_deg(double angle){
     return angle * 180/PI;
 }
 /**
- * @brief Normalises an angle to be in the range @f$ [0,2\pi) @f$.
+ * @brief Normalises an angle to be in the range @f$ [0,2\\pi) @f$.
  * 
  * @param angle the angle.
- * @return the angle with a suitable integer multiple of @f$ 2\pi @f$ added.
+ * @return the angle with a suitable integer multiple of @f$ 2\\pi @f$ added.
  */
 double Point::normalise_angle(double angle){
     assert(!std::isnan(angle));
@@ -181,7 +181,7 @@ double Point::normalise_angle(double angle){
  * @param angle the angle.
  * @param min   the lower bound of the range.
  * @param max   the upper bound ot the range. If less than @p min, 
- *              multiples of @f$ 2\pi @f$ of are added until it isn't.
+ *              multiples of @f$ 2\\pi @f$ of are added until it isn't.
  * @param incr  the angle step to be used in the adjustments.
  * @return the adjusted angle, or @c nan if the adjustment is impossible.
  */
@@ -237,7 +237,7 @@ Point operator+(const Point& p1, const Point& p2){
 }
 
 /**
- * @brief Assigns @code p1 + p2 @endcode as the new value of @p p1.
+ * @brief Assigns <tt> p1 + p2 </tt> as the new value of @p p1.
  * 
  * @param p1 the point to be changed.
  * @param p2 the point to add to it.
@@ -273,7 +273,7 @@ Point operator*(double scale, const Point& p){
 }
 
 /**
- * @brief Assigns @code p * scale @endcode as the new value of @p p.
+ * @brief Assigns <tt> p * scale </tt> as the new value of @p p.
  * 
  * @param p     the point.
  * @param scale the scaling factor.
@@ -308,7 +308,7 @@ bool operator!=(const Point& p1, const Point& p2){
 
 
 /**
- * @brief Prints a point like @code (x, y) @endcode.
+ * @brief Prints a point like <tt> (x, y) </tt>.
  * 
  * @param out   the stream to which the point should be printed.
  * @param p     the point.

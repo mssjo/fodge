@@ -25,16 +25,16 @@ namespace permute{
  * and must obey the following properties:
  * <ul>
  *  <li> The Generator is initialised so that dereferencing it yields the
- *      identity permutation, and @code operator bool @endcode yields 
+ *      identity permutation, and <tt>operator bool</tt> yields 
  *      @c false .
  *  <li> All permutations in the group are generated exactly once before any
  *      permutation is repeated.
  *  <li> When the entire group has been generated, and only then, should  
- *      @code operator bool @endcode yield @c true .
- *  <li> Other than the value of  @code operator bool @endcode, the
+ *      <tt>operator bool</tt> yield @c true .
+ *  <li> Other than the value of  <tt>operator bool</tt>, the
  *      Generator should otherwise be in the same state after traversing the
  *      entire group as it was immediately after initialisation. This allows
- *      for multi-pass use of a Generator.  @code operator bool @endcode
+ *      for multi-pass use of a Generator.  <tt>operator bool</tt>
  *      shall be set to @c false upon incrementation.
  * </ul>
  */
@@ -52,8 +52,8 @@ public:
     Generator(int n);
 
     /**
-     * @brief Converts the Generator to a Boolean value indicating whether it has
-     * completed a traversal of its group.
+     * @brief Converts the Generator to a Boolean value indicating whether it
+     * has completed a traversal of its group.
      * @return @c true if and only if the Generator has completed a traversal
      *          and is pointing to the identity permutation.
      */
@@ -71,17 +71,16 @@ public:
     pointer operator->() const      {   return &perm;   }
     
     virtual Generator& operator++() = 0;
-    //virtual Generator operator++(int) = 0;
 
 protected:
-    /** The return value of @code operator bool @endcode */
+    /** The return value of <tt>operator bool</tt> */
     bool done;
     /** The current permutation */
     Permutation perm;
 };
 
 /**
- * @brief A Generator that generates the cyclic group @f$   Z_n @f$ 
+ * @brief A Generator that generates the cyclic group @f$ Z_n @f$ 
  *      of @p n objects.
  */
 class Zn_Generator : public Generator {
@@ -92,19 +91,18 @@ public:
     virtual ~Zn_Generator() = default;
 
     Zn_Generator& operator++();
-    //Zn_Generator operator++(int);
 
 private:
     /** The order of the group */
     int n;
-    /** The number of steps taken so far; when @code count == n @endcode, 
+    /** The number of steps taken so far; when <tt> count == n </tt>, 
      * the traversal is complete. */
     int count;    
 };
 
 /**
  * @brief A Generator that generates the full permutation group 
- * @f$ \mathcal S_n @f$ of @p n objects. 
+ * @f$ S_n @f$ of @p n objects. 
  * 
  * It employs the non-recursive Heap's algorithm, which
  * efficiently traverses the set of permutations in such a way that each
@@ -118,7 +116,6 @@ public:
     virtual ~Sn_Generator() = default;
 
     Sn_Generator& operator++();
-    //Sn_Generator operator++(int);
 
 private:
     int n;
@@ -136,9 +133,9 @@ private:
  * 
  * This is the symmetry group of a product of traces,
  * where the ith trace contains a number of matrices equal to the ith element
- * in @f$ R @f$, under permutations of the set of matrices. The group combines
- * cyclic permutations within each trace with block-wise exchanges of the 
- * contents of traces that contain equally many matrices.
+ * in @f$ R @f$, under permutations of the set of matrices. The group 
+ * combines cyclic permutations within each trace with block-wise exchanges of 
+ * the contents of traces that contain equally many matrices.
  */
 class ZR_Generator : public Generator {
 
@@ -149,7 +146,6 @@ public:
     virtual ~ZR_Generator() = default;
 
     ZR_Generator& operator++();
-    //ZR_Generator operator++(int);
 
 private:     
     /** Lists the cyclic groups associated with all traces (first)

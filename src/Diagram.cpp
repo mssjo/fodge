@@ -26,8 +26,8 @@ Diagram::Diagram() : Diagram(2, std::vector<int>(1,4)) {};
  * 
  * Creates the unique single-vertex diagram with the given properties. 
  * No constructor (other than the copy constructor) exists for other diagrams;
- * these are instead created form other diagrams via the @link Diagram::extend @endlink
- * method.
+ * these are instead created form other diagrams via the 
+ * @link Diagram::extend @endlink method.
  */
 Diagram::Diagram(int order, const std::vector<int>& fsplit)
 : order(order), flav_split(fsplit), singlet_diagram(false), root(order, fsplit), labellings(),
@@ -189,7 +189,7 @@ bool operator==(const Diagram& d1, const Diagram& d2){
  * @return the stream.
  * 
  * The diagram is presented as 
- * @code O(p^<m>) <n>-point diagram, flavour split <fsp>, <k> distinct labellings @endcode,
+ * <tt> O(p^<i>m</i>) <i>n</i>-point diagram, flavour split <i>fsp</i>, <i>k</i> distinct labellings </tt>,
  * with values inserted to represent the diagram. A list of labellings then follows.
  */
 std::ostream& operator<<(std::ostream& out, const Diagram& d){
@@ -522,8 +522,8 @@ size_t Diagram::filter_flav_split(std::vector<Diagram>& diagrs,
  * is smaller than one preceding it.
  * 
  * The rules for flavour splits, as read from the NLSM Lagrangian, is that
- * each additional entry in a split "costs" @f$ \mathcal O(p^2)@f$, and each 
- * pair of odd splits cost an additional @f$ \mathcal O(p^2)@f$.
+ * each additional entry in a split "costs" @f$ \\mathcal O(p^2)@f$, and each 
+ * pair of odd splits cost an additional @f$ \\mathcal O(p^2)@f$.
  */
 std::vector<std::vector<int>> Diagram::valid_flav_splits(
     int order, int n_legs, int smallest_split)

@@ -1,6 +1,7 @@
-/* 
+/** 
+ * @file
  * File:   bitwise.hpp
- * Author: Mattias
+ * Author: Mattias Sjo
  * 
  * Utility templates for bitwise operations.
  *
@@ -15,7 +16,7 @@
 namespace bitwise {
 
 /**
- * @brief Undoes the shift operator @code 1 << s @endcode to retrieve @c s.
+ * @brief Undoes the shift operator <tt> 1 << s </tt> to retrieve @c s.
  * 
  * @tparam B    a binary integer type.
  * @param shifted   the shifted quantity. All sub-leading bits are ignored.

@@ -160,7 +160,7 @@ bool operator==(const Propagator& p1, const Propagator& p2){
  * 
  * The propagator is printed with X's and .'s representing the 1's and
  * 0's of the momentum mask. The source and destination orders are printed
- * as @code (src -> dest) @endcode, with previous-leg momenta written
+ * as <tt> (src -> dest) </tt>, with previous-leg momenta written
  * in brackets if needed.
  */
 std::ostream& operator<<(std::ostream& out, const Propagator& p){

@@ -81,7 +81,7 @@ Permutation Permutation::reverse() const {
 
 /**
  * @brief Constructs the inverse of a permutation.
- * @return the unique permutation such that @code *this * inverse() @endcode
+ * @return the unique permutation such that <tt> *this * inverse() </tt>
  *          is the identity.
  */
 Permutation Permutation::inverse() const {
@@ -96,7 +96,7 @@ Permutation Permutation::inverse() const {
 /**
  * @brief Computes the order of a permutation.
  * 
- * The order is the smallest integer @c m such that @code (*this) ^ m @endcode
+ * The order is the smallest integer @c m such that <tt> (*this) ^ m </tt>
  * is the identity. It is equal to the least common multiple of the lengths of 
  * all cycles in the cycle decomposition of the permutation.
  * 
@@ -160,9 +160,9 @@ int Permutation::parity() const {
  * @brief Applies a permutation to another permutation.
  * 
  * This has the same effect as 
- * @code permute(p.perm.begin(), offset, block_len) @endcode .
+ * <tt> permute(p.perm.begin(), offset, block_len) </tt> .
  * Without the optional argument, it behaves the same as 
- * @code p *= (*this) @endcode
+ * <tt> p *= (*this) </tt>
  * when the permutations are of the same size. 
  * 
  * @param p         the permutation to be modified.
@@ -216,7 +216,7 @@ Permutation operator* (const Permutation& p1, const Permutation& p2){
 /**
  * @brief Replaces one permutation with its composition with another.
  * 
- * This operator gives the same result as @code p1 = (p2 * p1) @endcode .
+ * This operator gives the same result as <tt> p1 = (p2 * p1) </tt> .
  * Note the reversal of the arguments due to the right-to-left ordering of 
  * compositions.
  * 
@@ -237,7 +237,7 @@ Permutation& operator*= (Permutation& p1, const Permutation& p2){
  * 
  * The complexity of this operator is linear in the size of @p p (as inherited
  * from the composition operator) and logarithmic in @p pow. Since @p pow can
- * always be reduced to be less than @link Propagator::order p.order() @endlink, 
+ * always be reduced to be less than @link Permutation::order p.order() @endlink, 
  * whose upper bound is roughly
  * exponential in @c p.size() , the worst-case complexity of this operator is
  * quadratic in the size of @p p .
@@ -265,7 +265,7 @@ Permutation operator^ (const Permutation& p, size_t pow){
     return res;
 }
 /**
- * @brief Assigns @code p ^ pow @endcode to @p p.
+ * @brief Assigns <tt> p ^ pow </tt> to @p p.
  */
 Permutation& operator^= (Permutation& p, size_t pow){
     p = p ^ pow;
@@ -291,10 +291,10 @@ Permutation& operator^= (Permutation& p, size_t pow){
  *              representative.
  * @param p2    the permutation with respect to which the equivalence classes
  *              are defined
- * @return  a permutation @c q such that @code q * p2^n == p1 @endcode 
+ * @return  a permutation @c q such that <tt> q * p2^n == p1 </tt> 
  *          for some @c n . It is chosen such that 
- *          @code p1 % p2 == p3 % p2 @endcode whenever 
- *          @code p3 == p1 * p2^n @endcode for some @c m .
+ *          <tt> p1 % p2 == p3 % p2 </tt> whenever 
+ *          <tt> p3 == p1 * p2^n </tt> for some @c m .
  */
 Permutation operator% (const Permutation& p1, const Permutation& p2){
     Permutation least(p1);
@@ -308,7 +308,7 @@ Permutation operator% (const Permutation& p1, const Permutation& p2){
     return least;
 }
 /**
- * @brief Assigns @code p1 % p2 @endcode to @p p.
+ * @brief Assigns <tt> p1 % p2 </tt> to @p p.
  */
 Permutation& operator%= (Permutation& p1, const Permutation& p2){
     p1 = p1 % p2;
@@ -351,7 +351,7 @@ std::ostream& operator<< (std::ostream& out, const Permutation& p){
 }
 
 /**
- * @brief Determines the <it>cycle type </it> of a permutation.
+ * @brief Determines the <i>cycle type </i> of a permutation.
  * 
  * The cycle type is a sorted list of the lengths of the cycles in the cycle
  * decomposition of the permutation. The sum of all elements in the cycle type

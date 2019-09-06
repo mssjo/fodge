@@ -28,7 +28,7 @@ void _print_FORM_header(std::ostream& form){
  * @brief Outputs a collection of diagrams for amplitude calculation by FORM.
  * 
  * @param filename  the basic filename. The files will be named 
- *                  @code <filename>_<part>.hf @endcode, where @c part is 
+ *                  <tt> <i>filename</i>_<i>part</i>.hf </tt>, where @c part is 
  *                  @c vert, @c diagr or @c ampl. 
  * @param diagrs    the diagrams.
  * @return  @c 0 if everything went alright, 
@@ -352,7 +352,7 @@ bool DiagramNode::heavy_vertex(const vertex& vert){
  *              vertex ID of a 
  *              @link DiagramNode::heavy_vertex heavy vertex @endlink.
  * 
- * The name is in the format @code [V<flav_split>p<order>.<index>] @endcode, 
+ * The name is in the format <tt> [V<i>flav_split</i>p<i>order</i>.<i>index</i>] </tt>, 
  * where @c flav_split is written as numbers separated by slashes. This is a 
  * remnant of a notation I used before I had fully developed the notion of a 
  * flavour split, but the notation has stuck in my FORM files so it would be 
@@ -373,7 +373,7 @@ void DiagramNode::vertex_name_FORM(std::ostream& form, const vertex& vert,
  * @param form a stream to the FORM output.
  * @param index the index of the diagram.
  * 
- * The name is in the format @code [D<flav_split>p<order>.<index>] @endcode, 
+ * The name is in the format <tt> [D<i>flav_split</i>p<i>order</i>.<i>index</i>] </tt>, 
  * where @c flav_split is written as numbers separated by slashes. This is a 
  * remnant of a notation I used before I had fully developed the notion of a 
  * flavour split, but the notation has stuck in my FORM files so it would be 
@@ -395,8 +395,8 @@ void Diagram::diagram_name_FORM(std::ostream& form, int index) const {
  * @param prop  the propagator momentum mask. @p this is only used as a dummy
  *              for formatting.
  * 
- * The propagator is written as @code prop(p<i1> + p<i2> + <...>) @endcode,
- * where @c i<j> are the indices of the momenta (counting from 1). For singlets,
+ * The propagator is written as <tt> prop(p<i>i1</i> + p<i>i2</i> + ...) </tt>,
+ * where the @c i are the indices of the momenta (counting from 1). For singlets,
  * @c prop is replaced by @c singlet.
  */
 void Propagator::FORM(std::ostream& form, mmask prop) const {    

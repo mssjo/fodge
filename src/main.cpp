@@ -1,6 +1,10 @@
-/* 
+/**
+ * @file 
  * File:   main.cpp
- * Author: Mattias
+ * 
+ * Author: Mattias Sjo
+ * 
+ * Contains the main method for FORM, along with some auxiliaries.
  *
  * Created on 12 June 2019, 15:34
  */
