@@ -25,5 +25,6 @@ mailto:mattias.sjo@thep.lu.se.
 
 NOTE: The version used in my 2019 master's thesis 
 (Lund University LU TP 19-21)
-is now deprecated, and has been moved to the old/
-directory. (It never worked very well, so good riddance.)
+is now deprecated, and has been removed from this repository.
+If you want to access it, just tell me.
+(It never worked very well, so good riddance.)
