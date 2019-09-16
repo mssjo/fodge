@@ -16,7 +16,7 @@
  *              defaults to <tt> (0,0) </tt>.
  */
 Point::Point(double x, double y, const Point& origin) 
-    : _x(x + origin._x), _y(y + origin._y) 
+    : xcoord(x + origin.xcoord), ycoord(y + origin.ycoord) 
 {}
 
 /**
@@ -60,6 +60,9 @@ std::vector<Point> Point::circle(double radius, int n_points,
     double angle = angle_offset;
     for(int i = 0; i < n_points; i++, angle += incr)
         circle.push_back(polar(radius, angle, origin));
+    
+    for(Point& pt : circle)
+        assert(!std::isnan(pt.xcoord) && !std::isnan(pt.ycoord));
         
     return circle;
 }
@@ -69,12 +72,12 @@ std::vector<Point> Point::circle(double radius, int n_points,
  * @brief Retrieves the horizontal coordinate of a point.
  * @return a copy of the x coordinate.
  */
-double Point::x() const {   return _x;   }
+double Point::x() const {   return xcoord;   }
 /**
  * @brief Retrieves the vertical coordinate of a point.
  * @return a copy of the y coordinate.
  */
-double Point::y() const {   return _y;   }
+double Point::y() const {   return ycoord;   }
 
 
 /**
@@ -83,7 +86,7 @@ double Point::y() const {   return _y;   }
  * @return the magnitude.
  */
 double Point::magnitude() const{
-    return hypot(_x, _y);
+    return hypot(xcoord, ycoord);
 }
 
 /**
@@ -94,7 +97,7 @@ double Point::magnitude() const{
  * @return the Euclidean distance between them.
  */
 double Point::distance(const Point& a, const Point& b){
-    return hypot(a._x - b._x, a._y - b._y);
+    return hypot(a.xcoord - b.xcoord, a.ycoord - b.ycoord);
 }
 
 /**
@@ -121,7 +124,11 @@ double Point::angle(const Point& a, const Point& b, const Point& c){
  *      relative to @p b. 
  */
 double Point::angle(const Point& a, const Point& b){
-    return normalise_angle(atan2(a._y - b._y, a._x - b._x));
+    if(a == b)
+        return std::nan("degenerate");
+    
+    double angle = atan2(a.ycoord - b.ycoord, a.xcoord - b.xcoord);    
+    return normalise_angle(angle);
 }
 
 /**
@@ -139,6 +146,9 @@ double Point::angle(const Point& a, const Point& b){
 bool Point::collinear(const Point& a, const Point& b, const Point& c, 
             double ang_tol){
     
+    if(a == b || b == c || c == a)
+        return true;
+    
     double ang = angle_in_range(angle(a, b, c), 0, PI, PI);
     
     return ang <= ang_tol || PI - ang <= ang_tol;
@@ -149,7 +159,7 @@ bool Point::collinear(const Point& a, const Point& b, const Point& c,
  * @brief Converts an angle in degrees to radians.
  * 
  * @param angle the angle.
- * @return the angle multiplied by @f$ \\pi/180 @f$.
+ * @return the angle multiplied by @f$ \pi/180 @f$.
  */
 double Point::deg_to_rad(double angle){
     return angle * PI/180;
@@ -158,16 +168,16 @@ double Point::deg_to_rad(double angle){
  * @brief Converts an angle in radians to degrees.
  * 
  * @param angle the angle.
- * @return the angle multiplied by @f$ 180/\\pi @f$.
+ * @return the angle multiplied by @f$ 180/\pi @f$.
  */
 double Point::rad_to_deg(double angle){
     return angle * 180/PI;
 }
 /**
- * @brief Normalises an angle to be in the range @f$ [0,2\\pi) @f$.
+ * @brief Normalises an angle to be in the range @f$ [0,2\pi) @f$.
  * 
  * @param angle the angle.
- * @return the angle with a suitable integer multiple of @f$ 2\\pi @f$ added.
+ * @return the angle with a suitable integer multiple of @f$ 2\pi @f$ added.
  */
 double Point::normalise_angle(double angle){
     assert(!std::isnan(angle));
@@ -181,7 +191,7 @@ double Point::normalise_angle(double angle){
  * @param angle the angle.
  * @param min   the lower bound of the range.
  * @param max   the upper bound ot the range. If less than @p min, 
- *              multiples of @f$ 2\\pi @f$ of are added until it isn't.
+ *              multiples of @f$ 2\pi @f$ of are added until it isn't.
  * @param incr  the angle step to be used in the adjustments.
  * @return the adjusted angle, or @c nan if the adjustment is impossible.
  */
@@ -193,8 +203,8 @@ double Point::angle_in_range(double angle, double min, double max, double incr){
         angle -= incr;
     while(angle < min)
         angle += incr;
-    
-    return (angle < max) ? angle : std::nan("");
+        
+    return (angle <= max) ? angle : std::nan("angle range");
 }
 
 /**
@@ -221,7 +231,7 @@ Point Point::to(const Point& target, double sep) const{
  * @return the specified point.
  */
 Point Point::towards(const Point& target, double ratio) const{
-    return Point((1-ratio)*_x + ratio*target._x, (1-ratio)*_y + ratio*target._y);
+    return Point((1-ratio)*xcoord + ratio*target.xcoord, (1-ratio)*ycoord + ratio*target.ycoord);
 }
 
 /**
@@ -233,7 +243,7 @@ Point Point::towards(const Point& target, double ratio) const{
  *      Alternatively, the vector sum of the point.
  */
 Point operator+(const Point& p1, const Point& p2){
-    return Point(p1._x + p2._x, p1._y + p2._y);
+    return Point(p1.xcoord + p2.xcoord, p1.ycoord + p2.ycoord);
 }
 
 /**
@@ -244,8 +254,8 @@ Point operator+(const Point& p1, const Point& p2){
  * @return a reference to the now-changed @p p1.
  */
 Point& operator+=(Point& p1, const Point& p2){
-    p1._x += p2._x;
-    p1._y += p2._y;
+    p1.xcoord += p2.xcoord;
+    p1.ycoord += p2.ycoord;
     return p1;
 }
 
@@ -258,7 +268,7 @@ Point& operator+=(Point& p1, const Point& p2){
  *          multiplication of @p p with @p scale.
  */
 Point operator*(const Point& p, double scale){
-    return Point(p._x * scale, p._y * scale);
+    return Point(p.xcoord * scale, p.ycoord * scale);
 }
 /**
  * @brief Rescales the coordinates of a point.
@@ -280,10 +290,42 @@ Point operator*(double scale, const Point& p){
  * @return a reference to the now-changed @p p.
  */
 Point& operator*=(Point& p, double scale){
-    p._x *= scale;
-    p._y *= scale;
+    p.xcoord *= scale;
+    p.ycoord *= scale;
     return p;
 }
+
+/**
+ * @brief Rotates a point.
+ * 
+ * @param angle the angle of rotation.
+ * @param ref the centre of rotation, defaults to the origin.
+ * @return a reference to the rotated point.
+ */
+Point& Point::rotate(double angle, const Point& ref)
+{
+    double x = xcoord - ref.xcoord, y = ycoord - ref.ycoord;
+    double s = std::sin(angle), c = std::cos(angle);
+    
+    xcoord = c*x - s*y + ref.xcoord;
+    ycoord = s*x + c*y + ref.ycoord;
+    
+    return *this;
+}
+
+
+/**
+ * @brief Makes a rotated copy of a point.
+ * 
+ * @param angle the angle of rotation.
+ * @param ref the centre of rotation, defaults to the origin.
+ * @return the rotated copy.
+ */
+Point Point::rotated(double angle, const Point& ref) const
+{
+    return Point(*this).rotate(angle, ref);
+}
+
 
 /**
  * @brief Compares two points for equality.
@@ -293,7 +335,7 @@ Point& operator*=(Point& p, double scale){
  * @return @c true if they are mathematically the same, @c false otherwise. 
  */
 bool operator==(const Point& p1, const Point& p2){
-    return p1._x == p2._x && p1._y == p2._y;
+    return p1.xcoord == p2.xcoord && p1.ycoord == p2.ycoord;
 }
 /**
  * @brief Compares two points for inequality.
@@ -303,7 +345,7 @@ bool operator==(const Point& p1, const Point& p2){
  * @return @c true if they are mathematically different, @c false otherwise. 
  */
 bool operator!=(const Point& p1, const Point& p2){
-    return p1._x != p2._x || p1._y != p2._y;
+    return p1.xcoord != p2.xcoord || p1.ycoord != p2.ycoord;
 }
 
 
@@ -315,6 +357,6 @@ bool operator!=(const Point& p1, const Point& p2){
  * @return the stream.
  */
 std::ostream& operator<<(std::ostream& out, const Point& p){
-    out << "(" << p._x << ", " << p._y << ")";
+    out << "(" << p.xcoord << ", " << p.ycoord << ")";
     return out;
 }

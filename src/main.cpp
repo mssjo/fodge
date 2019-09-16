@@ -4,7 +4,7 @@
  * 
  * Author: Mattias Sjo
  * 
- * Contains the main method for FORM, along with some auxiliaries.
+ * Contains the main method for FORM, along with some auxiliaries.  
  *
  * Created on 12 June 2019, 15:34
  */
@@ -87,17 +87,16 @@ bool parse_flav_split(char* str, vector< vector<int> >& flav_splits){
 
 /**
  * @brief Prints the help message.
- * 
- * FODGE is simple enough that manual formatting was quicker than automatically
- * generating the message a la man.
  */
 void print_help(){
    
+    //FODGE is simple enough that manual formatting was quicker 
+    //than automatically generating the message.
                                                                             //64-col here         
     cout << " " FODGE_VERSION " -- by Mattias Sjo, 2019                     \n"
             "\n"
             " FODGE generates flavour-ordered diagrams. For a description of\n"
-            " the uses of flavour-ordered diagrams, see the artivle by      \n"
+            " the uses of flavour-ordered diagrams, see the article by      \n"
             " Bijnens, Kampf & Sjo, 2019 (arXiv:1909:XXXXX).                \n"
             "\n"
             " To generate all O(p^m) n-point flavour-ordered diagrams, run  \n"
@@ -159,6 +158,10 @@ void print_help(){
             "                       the given value, in cm. The default     \n"
             "                       radius is adjusted to the number of     \n"
             "                       legs.                                   \n"
+            " -c [--draw-circle]    Draws a thin, grey circle around each   \n"
+            "                       diagram so that the external legs lie on\n"
+            "                       the circle. This may improve the reada- \n"
+            "                       bility of the diagrams.                 \n"
             " -o [--output-dir]     Changes the output directory. Defaults  \n"
             "                       to \"output/\".                         \n"
             " -n [--output-name]    Adds the given string to the beginnning \n"
@@ -182,7 +185,7 @@ int main(int argc, char** argv) {
     int n_legs, order;
     
     bool gen_form = false, gen_tikz = false;
-    bool split_tikz = false, custom_radius = false;
+    bool split_tikz = false, custom_radius = false, draw_circle = false;
     int tikz_split_size = 0;
     double radius = 0;
     
@@ -197,7 +200,7 @@ int main(int argc, char** argv) {
     // I opted for good ol' C-style getopt here 
     //rather than doing something fancy.
     opterr = 1;
-    const char* short_opts = "hN:O:tT:r:fldvo:n:sSi:x:";
+    const char* short_opts = "hN:O:tT:r:cfldvo:n:sSi:x:";
     struct option long_opts[] = {
         {"help",                no_argument,        0, 'h'},
         {"number-of-legs",      required_argument,  0, 'N'},
@@ -206,6 +209,7 @@ int main(int argc, char** argv) {
         {"generate-tikz",       no_argument,        0, 't'},
         {"tikz-split",          required_argument,  0, 'T'},
         {"tikz-radius",         required_argument,  0, 'r'},
+        {"draw-circle",         no_argument,        0, 'c'},
         {"list-diagrams",       no_argument,        0, 'l'},
         {"detailed-list",       no_argument,        0, 'd'},
         {"verbose",             no_argument,        0, 'v'},
@@ -248,6 +252,8 @@ int main(int argc, char** argv) {
                 custom_radius = true;
                 radius = atof(optarg);     
                 break;
+            case 'c':
+                draw_circle = true;         break;
                 
             case 'l':
                 list = true;                break;
@@ -353,7 +359,7 @@ int main(int argc, char** argv) {
         cout << "\n";
         
         if(Diagram::TikZ(filename.str() + "_tikz", 
-            diagrs, tikz_split_size, radius))
+            diagrs, tikz_split_size, radius, draw_circle))
         {
             return 1;
         }

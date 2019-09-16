@@ -89,9 +89,9 @@ public:
     static void compress_points(
         std::unordered_map<mmask, Point>& points, const Point& ref,
         mmask key, mmask sub_key, bool incl_parent, 
-        double mid_angle, double compression, double radius);
-    static Point compress_point(const Point& ref,
-        double angle, double mid_angle, double compression, double radius);
+        double mid_angle, double compression);
+    static Point compress_point(const Point& ref, const Point& pt,
+                                double mid_angle, double compression);
     
     //Methods for producing FORM output (implemented in FORM.cpp)
     void FORM(std::ostream& form, std::map<vertex, int>& verts, 

@@ -88,7 +88,7 @@ int Diagram::FORM(const std::string& filename,
     
     std::cout << "FORMing amplitude to file \"" << filename << "_ampl.hf\"...\n";
     
-    form << "[M" << diagrs[0].n_legs << "p" << diagrs[0].order << "] =";
+    form << "global [M" << diagrs[0].n_legs << "p" << diagrs[0].order << "] =";
     prev_flav_split = {};
     for(int i = 0; i < diagrs.size(); i++){
         if(i % 5 == 0)
@@ -135,28 +135,33 @@ int Diagram::FORM(const std::string& filename,
  */
 void Diagram::FORM(std::ostream& form, std::map<vertex,int>& verts, int index) 
 const {
-    auto local_verts = std::map<vertex, int>();
+    std::map<vertex, int> local_verts = {};
     
     //Outputs the code
+    form << "global ";
     diagram_name_FORM(form, index);
     form << " =\n";
     root.FORM(form, local_verts, 1, Propagator(0, n_legs, 0, 0));
     
     //Adds the vertices needed for this diagram to the total count.
-    for(auto vert_count : local_verts){
-        if(DiagramNode::heavy_vertex(vert_count.first)){
-            for(int i = 0; i < vert_count.second; i++){
+    for(auto local_count : local_verts){
+        //Also appends heavy vertices outside the main "diagram(...)"
+        //References to its index inside will handle the correct placement.
+        if(DiagramNode::heavy_vertex(local_count.first)){
+            for(int i = 0; i < local_count.second; i++){
                 form << std::string(2*INDENT_SIZE, ' ') << " * "; 
-                DiagramNode::vertex_name_FORM(form, vert_count.first, i+1, false);
+                DiagramNode::vertex_name_FORM(form, local_count.first, i+1, false);
                 form << "\n";
             }
         }
-            
-        auto global_count = verts.find(vert_count.first);
+        
+        //This ensures that each entry in verts is the maximum of all
+        //corresponding entries in local_verts across all diagrams.
+        auto global_count = verts.find(local_count.first);
         if(global_count == verts.end())
-            verts.insert(vert_count);
+            verts.insert(local_count);
         else
-            (*global_count).second += vert_count.second;
+            global_count->second = std::max(local_count.second, global_count->second);
     }
     
     //Adds permutations corresponding to the distinct labellings.
@@ -229,7 +234,13 @@ const {
     
     //Adds a new level of nesting for diagram.prc
     form << std::string(depth*INDENT_SIZE, ' ') << "diagram(";
-    vertex_name_FORM(form, vert, vert_idx, heavy_vertex(vert));
+    if(heavy_vertex(vert)){
+        form << "`";
+        vertex_name_FORM(form, vert, vert_idx, true);
+        form << "'";
+    }
+    else
+        vertex_name_FORM(form, vert, vert_idx, false);
     
     for(int i = 0; i < traces.size(); i++){
         auto tr = traces[ sort_perm[i] ];
@@ -247,6 +258,7 @@ const {
             //Writes out the propagator back to the parent
             form << (is_singlet ? ", singlet(" : ", prop(");
             prop.FORM(form, momenta);
+            form << ")";
         }
     }
     form << ")\n";
@@ -352,19 +364,25 @@ bool DiagramNode::heavy_vertex(const vertex& vert){
  *              vertex ID of a 
  *              @link DiagramNode::heavy_vertex heavy vertex @endlink.
  * 
- * The name is in the format <tt> [V<i>flav_split</i>p<i>order</i>.<i>index</i>] </tt>, 
+ * The name is in the format 
+ * <tt> [V<i>flav_split</i>p<i>order</i>.<i>index</i>] </tt>, 
  * where @c flav_split is written as numbers separated by slashes. This is a 
  * remnant of a notation I used before I had fully developed the notion of a 
  * flavour split, but the notation has stuck in my FORM files so it would be 
  * inconsistent to change it.
+ * 
+ * When @p vertid is true, the square brackets are removed and all 
+ * non-alphanumeric characters are replaced with letters to conform with FORM's
+ * rules for the names of preprocessor variables.
  */
 void DiagramNode::vertex_name_FORM(std::ostream& form, const vertex& vert, 
                                 int index, bool vertid)
 {
-    form << (vertid ? "`[vid" : "[V") << vert.second[0];
+    form << (vertid ? "V" : "[V") << vert.second[0];
     for(int i = 1; i < vert.second.size(); i++)
-        form << "/" << vert.second[i];
-    form << "p" << vert.first << "." << index << (vertid ? "]'" : "]");
+        form << (vertid ? "s" : "/") << vert.second[i];
+    form << "p" << vert.first << (vertid ? "v" : ".") 
+         << index << (vertid ? "" : "]");
 }
 
 /**
@@ -401,11 +419,13 @@ void Diagram::diagram_name_FORM(std::ostream& form, int index) const {
  */
 void Propagator::FORM(std::ostream& form, mmask prop) const {    
     mmask one = (mmask) 1;
-    prop = normalise_mmask(prop, one << (n_mom - 1), (one << n_mom) - 1);
+    mmask nprop = normalise_mmask(prop, one << (n_mom - 1), (one << n_mom) - 1);
     
+    if(prop != nprop)
+        form << "-(";
     bool first = true;
-    for(int i = 0; (one << i) < prop && i < n_mom; i++){
-        if(prop & (one << i)){
+    for(int i = 0; (one << i) < nprop && i < n_mom; i++){
+        if(nprop & (one << i)){
             if(!first)
                 form << "+";
             else
@@ -414,4 +434,6 @@ void Propagator::FORM(std::ostream& form, mmask prop) const {
             form << "p" << (i+1);
         }
     }
+    if(prop != nprop)
+        form << ") ";
 }

@@ -53,14 +53,17 @@ public:
     friend Point operator*(double scale, const Point& p);
     friend Point& operator*=(Point& p, double scale);
     
+    Point& rotate(double angle, const Point& ref = Point());
+    Point rotated(double angle, const Point& ref = Point()) const;
+    
     friend bool operator==(const Point& p1, const Point& p2);
     friend bool operator!=(const Point& p1, const Point& p2);
     
     friend std::ostream& operator<<(std::ostream& out, const Point& p);
     
 private:
-    double _x;
-    double _y;
+    double xcoord;
+    double ycoord;
 };
 
 #endif	/* POINT_H */

@@ -52,9 +52,11 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const Diagram& d);
     static void summarise(std::ostream& out, const std::vector<Diagram>& diagrs);
     
-    void TikZ(std::ostream& tikz, double radius = 0, int idx = -1) const;
+    void TikZ(std::ostream& tikz, double radius = 0, int idx = -1, 
+              bool draw_circle = false) const;
     static int TikZ(const std::string& filename, const std::vector<Diagram>& diagrs,
-                    int split, double radius);
+                    int split, double radius, bool draw_circle);
+    static void balance_points(std::unordered_map<mmask, Point>& pts);
     
     void FORM(std::ostream& form, std::map<vertex, int>& verts, int index) const;
     void diagram_name_FORM(std::ostream& form, int index) const;

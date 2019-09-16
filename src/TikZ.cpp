@@ -37,9 +37,10 @@ void print_TikZ_header(std::ostream& tikz){
             "% \n"
             "% \\documentclass{article}\n"
             "% \\usepackage{pgf, tikz}\n"
+            "% \\usetikzlibrary{intersections}\n"
             "% \n"
-            "% \\newcommand{\\ordidx}[1]{\\textbf{#1}} %or whatever formatting" 
-            "%                                         %you want of vertex orders"
+            "% \\newcommand{\\ordidx}[1]{\\textbf{#1}} %or whatever formatting\n" 
+            "%                                      %you want of vertex orders\n"
             "% \n"
             "% \\begin{document}\n"
             "% \t\\input{<this file>}\n"
@@ -60,6 +61,7 @@ void print_TikZ_header(std::ostream& tikz){
  * @param radius    if positive, this is the radius (in cm) used for the 
  *                  diagram drawings. Otherwise, a suitable radius is chosen 
  *                  based on the number of legs on then diagrams.
+ * @param circle    if true, a thin grey circle is drawn around each diagram.
  * @return  @c 0 if everything went alright, 
  *          @c 1 (after printing a message to @c cerr) if it did not.
  * 
@@ -69,7 +71,7 @@ void print_TikZ_header(std::ostream& tikz){
  */
 int Diagram::TikZ(const std::string& filename, 
                   const std::vector<Diagram>& diagrs, 
-                  int split, double radius)
+                  int split, double radius, bool draw_circle)
 {
     if(diagrs.empty())
         return 0;
@@ -107,18 +109,18 @@ int Diagram::TikZ(const std::string& filename,
         tikz.open(filename + ".tex", std::ios::out | std::ios::trunc);
         if(tikz.fail()){
             std::cerr << "ERROR: could not open file \"" 
-                << filename << "_tikz.tex\"\n";
+                << filename << ".tex\"\n";
             return 1;
         }
         print_TikZ_header(tikz);
         tikz << "\n";
         
         std::cout << "TikZing diagrams to file  \"" 
-            << filename << "_tikz.tex\"...\n";  
+            << filename << ".tex\"...\n";  
         
         int idx = 0;
         for(const Diagram& d : diagrs)
-            d.TikZ(tikz, radius, idx++);
+            d.TikZ(tikz, radius, idx++, draw_circle);
         tikz.close();
     }
     
@@ -136,7 +138,8 @@ int Diagram::TikZ(const std::string& filename,
  * The diagram is drawn as a TikZpicture. The actual drawing is
  * delegated to its @link DiagramNode nodes @endlink.
  */
-void Diagram::TikZ(std::ostream& tikz, double radius, int index) const{
+void Diagram::TikZ(std::ostream& tikz, 
+                   double radius, int index, bool draw_circle) const{
     
     tikz << std::setprecision(3) << std::fixed << std::uppercase;
     
@@ -146,17 +149,22 @@ void Diagram::TikZ(std::ostream& tikz, double radius, int index) const{
                 << n_legs << "-point diagram\n";
     
     tikz << "\\begin{tikzpicture}[>=stealth]\n";
-//    tikz << "\t\\draw[black!50] (0,0) circle[radius=" << radius << "];" << std::endl;
+    
+    //Circle increases or decreases readability depending on who you ask
+    if(draw_circle)
+        tikz << "\t\\draw[black!30] (0,0) circle[radius=" << radius << "];\n";
     
     auto points = std::unordered_map<mmask, Point>();
     int idx = 0;
     while(!root.def_TikZ(Point::circle(radius, n_legs), &idx, points));
     
     root.adjust_TikZ(points, radius);
-        
+    
+    balance_points(points);
+    
     root.draw_TikZ(tikz, points);
     
-    tikz << "\\end{tikzpicture}\\:\n%" << std::endl;
+    tikz << "\\end{tikzpicture}\\ \n%" << std::endl;
 }
 
 
@@ -219,11 +227,15 @@ bool DiagramNode::def_TikZ(
     
     Point pt = Point();
     int count = 0;
+    //true if all descendants are done
     bool subtree_done = true;
+    //true if node's own point is defined
     bool self_done = (points.find(momenta) != points.end());
+    
     for(const FlavourTrace& tr : traces){
         for(const DiagramNode& leg : tr.legs){
            
+            //if node is not done - find contributions from children
             if(!self_done){
                 auto it = points.find(leg.momenta);
                 
@@ -243,12 +255,15 @@ bool DiagramNode::def_TikZ(
                 }
             }
                 
+            //recurses regardless of done-ness -- there may be non-done nodes
+            //further down
             if(!leg.is_leaf)
                 subtree_done = leg.def_TikZ(perimeter, idx, points, momenta)
                         && subtree_done;
         }
     }  
     
+    //adds contribution from parent
     if(!is_root){
         auto it = points.find(parent_key);
         if(it != points.end()){
@@ -257,10 +272,14 @@ bool DiagramNode::def_TikZ(
         }
     }
     
+    //if at least one neighbour is defined, define own point
+    //(if not defined already)
     if(count > 0 && !self_done){
-        pt *= 1./(n_legs + (is_root ? 0 : 1) + 1);
+        //Adds an extra "phantom leg" to the normalisation to offset points
+        //towards center
+        pt *= 1./(n_legs + (is_root ? 1 : 2));
         points.insert(std::make_pair(momenta, pt));
-        return subtree_done;
+        self_done = true;
     }
         
     return self_done && subtree_done;
@@ -305,7 +324,7 @@ void DiagramNode::adjust_TikZ(
     if(traces.size() > 1){
         int idx = 0;
         for(const FlavourTrace& tr : traces){
-            bool incl_parent = !tr.connected;
+            bool incl_parent = tr.connected;
             Point& i_pt = points.at(
                     incl_parent ? parent_key : tr.legs.front().momenta);
             
@@ -320,7 +339,7 @@ void DiagramNode::adjust_TikZ(
                 
                 //This implements the actual transformation.
                 compress_points(points, pt, momenta, tr.momenta, incl_parent, 
-                        ang_avg, ang_diff/PI, radius);
+                        ang_avg, ang_diff/PI);
             }
             
             idx++;
@@ -347,12 +366,11 @@ void DiagramNode::adjust_TikZ(
  * @param mid_angle the central angle, where the rotation is zero.
  * @param compression the factor by which all point's angular distance from 
  *                  @p mid_angle should be compressed.
- * @param radius    the radius of the drawing.
  */
 void DiagramNode::compress_points(
         std::unordered_map<mmask,Point>& points, const Point& ref,
         mmask key, mmask sub_key, bool incl_parent, 
-        double mid_angle, double compression, double radius)
+        double mid_angle, double compression)
 {
     
     for(auto& key_val : points){
@@ -367,8 +385,8 @@ void DiagramNode::compress_points(
         if(!adjust || (key_val.first == key))
             continue;
         
-        key_val.second = compress_point(ref, Point::angle(key_val.second, ref),
-                mid_angle, compression, radius);
+        key_val.second = compress_point(ref, key_val.second,
+                                        mid_angle, compression);
     }
 }
 
@@ -376,46 +394,106 @@ void DiagramNode::compress_points(
  * @brief Applies @link DiagramNode::compress_points @endlink to a single point.
  * 
  * @param ref       the point around which the point should be rotated.
- * @param angle     the polar angle of the location of this node 
- *                  relative to @p ref.
+ * @param pt        the point to rotate.
  * @param mid_angle the central angle. The goal is to change @p angle 
  *                  relative to this.
  * @param compression the angle relative to @p mid_angle should be compressed 
  *                  by this much.
- * @param radius    the radius of the drawing.
  * @return the new location after the transformation.
  * 
  * The main crux is to rotate the point around @p ref while maintaining the same
  * distance to the origin, so that the diagram is not distorted. This takes a
  * bit of math.
  */
-Point DiagramNode::compress_point(const Point& ref,
-        double angle, double mid_angle, double compression, double radius){
+Point DiagramNode::compress_point(const Point& ref, const Point& pt,
+        double mid_angle, double compression){
     
+    //Original parameters of the point 
+    //(note that angle and radius are defined from different origins)
+    double angle = Point::angle(pt, ref);
+    double radius = pt.magnitude();
+    
+    //Target parameters of the point (radius should be conserved)
     double diff = Point::angle_in_range(angle - mid_angle, -PI, PI);
     angle = mid_angle + (diff / compression);
     
     //Constructs unit vector (c,s) = (cos('angle'), sin('angle')), and 
     //then rescales it so that it reaches from ref = (x,y) to a distance 
-    //'radius' from origin
-    // [ a (c,s) + (x,y) ]^2 = r^2 
-    // -> a^2 + 2a[cx+sy] + [xx+yy] = r^2
-    // -> a = -[cx+sy] + sqrt([cx+sy]^2 + r^2 - [xx+yy])
+    //r = 'radius' from origin
+    // [ scale (c,s) + (x,y) ]^2 = r^2 
+    // -> scale^2 + 2 scale [cx+sy] + [xx+yy] = r^2
+    // -> scale = -[cx+sy] + sqrt([cx+sy]^2 + r^2 - [xx+yy])
     // (choosing positive solution)
     double cxsy = cos(angle) * ref.x() + sin(angle) * ref.y();
-    double magn = ref.magnitude();
-    double scale = sqrt(cxsy*cxsy + radius*radius - magn*magn) - cxsy;
+    double xxyy = ref.x()*ref.x() + ref.y()*ref.y();
+    double scale = sqrt(cxsy*cxsy + radius*radius - xxyy) - cxsy;
     
     //Just in case something goes awry
     if(std::isnan(scale + angle)){
         std::cerr << "ERROR: internal error in TikZ adjustment.\n"
-        "radius: " << radius << ", magn: " << magn << ", cxsy: " << cxsy 
+        "radius: " << radius << ", xxyy: " << xxyy << ", cxsy: " << cxsy 
             << std::endl;
         exit(EXIT_FAILURE);
     }
     
     return Point::polar(scale, angle, ref);
 }
+
+/**
+ * @brief Rotates the diagram so that it becomes more "balanced".
+ * 
+ * @param pts the points of the diagram.
+ * 
+ * The balancing aims to minimise @f$\sum_i y_i^2@f$, the square vertical
+ * deviation of all points from the centerline. Unless the diagram is
+ * highly symmetric, this leads to two minimal configurations with a mostly
+ * horizontal "backbone" similar to hand-drawn diagrams. Of these, the one with
+ * lowest "centre of gravity" is chosen.
+ * 
+ * @todo choose weights that are less likely to be foiled by symmetric diagrams.
+ */
+void Diagram::balance_points(std::unordered_map<mmask, Point>& pts)
+{
+    if(pts.size() < 2)
+        return;
+    
+    //Sums the x and y coordinates of the original points, as well as the
+    //x^2, y^2 and x*y.
+    double sx2 = 0, sy2 = 0, sxy = 0, sx = 0, sy = 0;
+    for(auto& key_pt : pts){
+        double x = key_pt.second.x();
+        double y = key_pt.second.y();
+        
+        sx += x;
+        sy += y;
+        
+        sx2 += x*x;
+        sy2 += y*y;
+        sxy += x*y;
+    }
+    
+    //The derivative of sy2 *after* a rotation by 'a' is
+    // sin(2a) [sx2 - sy2] + 2 cos(2a) sxy,
+    //in terms of the sums *before* the rotation.
+    //Half this angle therefore minimises the derivative.
+    double dbl_ang = std::atan2(2*sxy, sy2 - sx2);
+    
+    //Ensures that the second derivative is positive -- we want a minimum!
+    if(std::cos(dbl_ang) * (sx2 - sy2) - 2*std::sin(dbl_ang) * sxy < 0)
+        dbl_ang += PI;
+    
+    //Angle of rotation
+    double ang = dbl_ang/2;
+    
+    //Minimises the centre of gravity
+    if(cos(ang) * sx + sin(ang) * sy > 0)
+        ang += PI;
+    
+    //Rotates the points
+    for(auto& key_pt : pts)
+        key_pt.second.rotate(ang);
+}
+
 
 #define ENCOMP_NAME(m) "p" << std::hex << m << std::dec
 #define INTSCT_NAME(m,n) "p" << std::hex << m << "x" << n << std::dec
@@ -475,7 +553,7 @@ Point DiagramNode::draw_TikZ(
         //If beginning and end are collinear, there is no need to mess with
         //curved lines -- just draw all lines as if drawing a non-split vertex!
         //(Drawing line to parent is left to the parent.)
-        if(Point::collinear(begin, this_pt, end, COLL_TOL)){ 
+        if(false && Point::collinear(begin, this_pt, end, COLL_TOL)){ 
             for(int i = 0; i < tr.legs.size(); i++){
                 Point target_pt;
                 if(i == 0 && !tr.connected)
@@ -585,15 +663,17 @@ void DiagramNode::vertex_order_TikZ(
     if(is_leaf || order == 2)
         return;
     
-    //Finds the polar angles and gaps between all neighbouring legs.
+    //Finds the polar angles between all neighbouring legs,
+    //and marks whether they correspond to flavour split gaps.
     Point pt = points.at(momenta);
     std::vector<std::pair<double, bool>> angles_gaps = {};
     
-    if(!is_root)
+    if(!is_root){
         angles_gaps.push_back(std::make_pair(
                 Point::angle(points.at(parent_key), pt),
                 false 
         ));
+    }
     
     for(const FlavourTrace& tr : traces){
         for(const DiagramNode& leg : tr.legs){
@@ -604,6 +684,7 @@ void DiagramNode::vertex_order_TikZ(
         }
         angles_gaps.back().second = (traces.size() > 1);
     }
+    
         
     //Finds the widest gap, gives a bonus for being a flavour split.
     std::sort(angles_gaps.begin(), angles_gaps.end());
@@ -643,6 +724,7 @@ void DiagramNode::vertex_order_TikZ(
             leg.vertex_order_TikZ(tikz, points, momenta);
         }
     }
+    
 }
 
 
