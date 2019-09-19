@@ -7,7 +7,7 @@ used in upcoming article arXiv:1909.XXXXX by
 J. Bijnens, K. Kampf and me. Inspired by earlier work 
 by J. Bijnens.
 
-To install, place all files and directories (except old/)
+To install, place all files and directories
 in a directory of your choice, and run "cmake ."
 followed by "make fodge". Run "doxygen Doxyfile" to generate 
 documentation.
