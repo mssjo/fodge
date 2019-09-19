@@ -45,12 +45,12 @@ public:
     friend bool operator<(const Diagram& d1, const Diagram& d2);
     friend bool operator==(const Diagram& d1, const Diagram& d2);
     
-   static size_t filter_flav_split(std::vector<Diagram>& diagrs, 
+    static size_t filter_flav_split(std::vector<Diagram>& diagrs, 
                                   const std::vector<std::vector<int>>& filter, 
                                   bool include);
     
     friend std::ostream& operator<<(std::ostream& out, const Diagram& d);
-    static void summarise(std::ostream& out, const std::vector<Diagram>& diagrs);
+    static int summarise(std::ostream& out, const std::vector<Diagram>& diagrs);
     
     void TikZ(std::ostream& tikz, double radius = 0, int idx = -1, 
               bool draw_circle = false) const;

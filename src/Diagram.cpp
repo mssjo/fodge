@@ -213,18 +213,19 @@ std::ostream& operator<<(std::ostream& out, const Diagram& d){
  * 
  * @param out the stream to which the table is printed.
  * @param diagrs the diagrams.
+ * @return the number of singlet diagrams in the list.
  * 
  * The table lists the number of diagrams per flavour structure,
  * and the number of singlet diagrams if such are present.
  */
-void Diagram::summarise(std::ostream& out, const std::vector<Diagram>& diagrs)
+int Diagram::summarise(std::ostream& out, const std::vector<Diagram>& diagrs)
 {
     if(diagrs.empty())
-        return;
+        return 0;
     
     std::map<std::vector<int>, std::pair<size_t, size_t> > counts = {};
         
-    bool any_singlets = false;
+    int n_singlets = 0;
     size_t max_count = 0, max_fsp_len = 0;
     
     //Counts the number of diagrams in (non-singlet, singlet) pairs
@@ -252,7 +253,7 @@ void Diagram::summarise(std::ostream& out, const std::vector<Diagram>& diagrs)
         
         if(diagrs[i].singlet_diagram){
             count.second++;
-            any_singlets = true;
+            n_singlets++;
         }
         else{
             count.first++;
@@ -266,17 +267,18 @@ void Diagram::summarise(std::ostream& out, const std::vector<Diagram>& diagrs)
     size_t w2 = std::max(col2.length(), std::to_string(max_count).length());
     
     //Horizontal line in the table -- three are needed so we make a macro
-#define TABLE_HLINE     out << std::string(w1, '-') << "-+-" << std::string(w2, '-'); \
-                        if(any_singlets) out << "-+-" << std::string(w2, '-');        \
-                        out << "-\n";
+#define TABLE_HLINE     out << "+-"                                                   \
+                            << std::string(w1, '-') << "-+-" << std::string(w2, '-'); \
+                        if(n_singlets > 0) out << "-+-" << std::string(w2, '-');      \
+                        out << "-+\n";
                         
     TABLE_HLINE
     
-    out << std::setw(w1) << col1 << " | " 
+    out << "| " << std::setw(w1) << col1 << " | " 
         << std::setw(w2) << col2;
-    if(any_singlets)
+    if(n_singlets > 0)
         out << " | " << col3;
-    out << "\n";
+    out << " |\n";
     
     TABLE_HLINE
     
@@ -284,11 +286,12 @@ void Diagram::summarise(std::ostream& out, const std::vector<Diagram>& diagrs)
         std::ostringstream fsp_str;
         fsp_str << key_val.first;        
         
-        out << std::setw(w1) << fsp_str.str() << std::setw(0) << " | "
+        out << "| " 
+            << std::setw(w1) << fsp_str.str() << std::setw(0) << " | "
             << std::setw(w2) << key_val.second.first + key_val.second.second << std::setw(0);
-        if(any_singlets)
+        if(n_singlets > 0)
             out << " | " << std::setw(w2) << key_val.second.second << std::setw(0);
-        out << "\n";
+        out << " |\n";
     }
     
     TABLE_HLINE

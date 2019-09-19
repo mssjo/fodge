@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
          << " --*-*-- FODGE version 2.0 --*-*--\n"
          << " --*-*-- Mattias Sjo, 2019 --*-*--\n";
          
-    cout << "\nGenerating diagrams...\n";
+    cout << "\nGenerating O(p^" << order << ") " << n_legs << "-point diagrams...\n";
     auto diagrs = Diagram::generate(order, n_legs, singlets, true, verbose);
         
     cout << "\n";
