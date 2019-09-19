@@ -76,7 +76,7 @@ public:
     bool def_TikZ(const std::vector<Point>& perimeter, int*idx,
         std::unordered_map<mmask, Point>& points, 
         mmask parent_key = 0) const;
-    void adjust_TikZ(/*std::ostream& tikz,*/
+    void adjust_TikZ(std::ostream& tikz,
         std::unordered_map<mmask, Point>& points,
         double radius, mmask parent_key = 0) const;
     Point draw_TikZ(std::ostream& tikz, 
@@ -84,8 +84,7 @@ public:
         mmask parent_key = 0) const;
     void vertex_order_TikZ(std::ostream& tikz, 
         const std::unordered_map<mmask, Point> points, 
-        mmask parent_key = 0
-    ) const;
+        mmask parent_key = 0) const;
     static void compress_points(
         std::unordered_map<mmask, Point>& points, const Point& ref,
         mmask key, mmask sub_key, bool incl_parent, 

@@ -41,6 +41,8 @@ void print_TikZ_header(std::ostream& tikz){
             "% \n"
             "% \\newcommand{\\ordidx}[1]{\\textbf{#1}} %or whatever formatting\n" 
             "%                                      %you want of vertex orders\n"
+            "% \\newcommand{\\fodgespace}{\\quad} %or whatever space you want \n"
+            "%                                 %between the diagrams          \n"
             "% \n"
             "% \\begin{document}\n"
             "% \t\\input{<this file>}\n"
@@ -158,13 +160,14 @@ void Diagram::TikZ(std::ostream& tikz,
     int idx = 0;
     while(!root.def_TikZ(Point::circle(radius, n_legs), &idx, points));
     
-    root.adjust_TikZ(points, radius);
+    root.adjust_TikZ(tikz, points, radius);
     
-    balance_points(points);
+    //balance_points(points);
     
     root.draw_TikZ(tikz, points);
+    root.vertex_order_TikZ(tikz, points);
     
-    tikz << "\\end{tikzpicture}\\ \n%" << std::endl;
+    tikz << "\\end{tikzpicture}\\fodgespace\n%" << std::endl;
 }
 
 
@@ -311,7 +314,7 @@ bool DiagramNode::def_TikZ(
  * 
  * @todo fix this method if its error ever results in something bad.
  */
-void DiagramNode::adjust_TikZ(
+void DiagramNode::adjust_TikZ(std::ostream& tikz,
         std::unordered_map<mmask,Point>& points, 
         double radius, mmask parent_key) const
 {
@@ -324,12 +327,19 @@ void DiagramNode::adjust_TikZ(
     if(traces.size() > 1){
         int idx = 0;
         for(const FlavourTrace& tr : traces){
+            
             bool incl_parent = tr.connected;
+            //The adjustment may fail for two-leg traces, and there is never
+            //any need to adjust such a trace.
+            if(tr.legs.size() + (incl_parent ? 1 : 0) <= 2)
+                continue;
+            
             Point& i_pt = points.at(
                     incl_parent ? parent_key : tr.legs.front().momenta);
+            Point& f_pt = points.at(tr.legs.back().momenta);
             
             ang_i = Point::angle(i_pt, pt);
-            ang_f = Point::angle(points.at(tr.legs.back().momenta), pt);
+            ang_f = Point::angle(f_pt, pt);
             
             ang_diff = Point::normalise_angle(ang_f - ang_i);
             ang_avg  = Point::angle_in_range((ang_f + ang_i)/2, 
@@ -348,7 +358,7 @@ void DiagramNode::adjust_TikZ(
     
     for(const FlavourTrace& tr : traces){
         for(const DiagramNode& leg : tr.legs){
-            leg.adjust_TikZ(points, radius, momenta);
+            leg.adjust_TikZ(tikz, points, radius, momenta);
         }
     }
 }
@@ -374,9 +384,9 @@ void DiagramNode::compress_points(
 {
     
     for(auto& key_val : points){
-        //Only adjusts children of the specific trace (i.e. points whose keys
+        //Only adjusts descendants of the specific trace (i.e. points whose keys
         //are subsets of sub_key)
-        //If incl_parent, also adjusts what would be children if the node's
+        //If incl_parent, also adjusts what would be descendants if the node's
         //parent were its child (i.e. points whose keys are not subsets of
         //this node's key)
         bool adjust =  SUBSET(key_val.first, sub_key) 
@@ -408,6 +418,7 @@ void DiagramNode::compress_points(
 Point DiagramNode::compress_point(const Point& ref, const Point& pt,
         double mid_angle, double compression){
     
+    
     //Original parameters of the point 
     //(note that angle and radius are defined from different origins)
     double angle = Point::angle(pt, ref);
@@ -426,8 +437,10 @@ Point DiagramNode::compress_point(const Point& ref, const Point& pt,
     // (choosing positive solution)
     double cxsy = cos(angle) * ref.x() + sin(angle) * ref.y();
     double xxyy = ref.x()*ref.x() + ref.y()*ref.y();
-    double scale = sqrt(cxsy*cxsy + radius*radius - xxyy) - cxsy;
-    
+
+    double scale = //Point::distance(ref, pt);
+            sqrt(cxsy*cxsy + radius*radius - xxyy) - cxsy;
+                
     //Just in case something goes awry
     if(std::isnan(scale + angle)){
         std::cerr << "ERROR: internal error in TikZ adjustment.\n"
@@ -522,8 +535,6 @@ Point DiagramNode::draw_TikZ(
 {
     if(is_leaf)
         return points.at(momenta);
-    
-    vertex_order_TikZ(tikz, points, parent_key);
     
     Point this_pt = points.at(momenta);
     

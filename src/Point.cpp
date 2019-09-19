@@ -124,8 +124,10 @@ double Point::angle(const Point& a, const Point& b, const Point& c){
  *      relative to @p b. 
  */
 double Point::angle(const Point& a, const Point& b){
-    if(a == b)
-        return std::nan("degenerate");
+    if(a == b){
+        std::cerr << "ERROR: attempting to find angle beween identical points\n";
+        exit(EXIT_FAILURE);
+    }
     
     double angle = atan2(a.ycoord - b.ycoord, a.xcoord - b.xcoord);    
     return normalise_angle(angle);
@@ -204,7 +206,13 @@ double Point::angle_in_range(double angle, double min, double max, double incr){
     while(angle < min)
         angle += incr;
         
-    return (angle <= max) ? angle : std::nan("angle range");
+    if(angle > max){
+        std::cerr << "ERROR: unable to fit angle " << angle 
+                    << "in range [" << min << "," << max << "]\n";
+        exit(EXIT_FAILURE);
+    }
+    
+    return angle;
 }
 
 /**
