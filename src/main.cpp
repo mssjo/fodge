@@ -373,11 +373,15 @@ int main(int argc, char** argv) {
     }
     
     //Prints summary
+    int n_singlets = 0;
     if(list && !diagrs.empty())
-        Diagram::summarise(cout << "\n", diagrs);
+        n_singlets = Diagram::summarise(cout << "\n", diagrs);
     
     //Only default output: number of diagrams generated.
-    cout << "\nTotal diagrams: " << diagrs.size() << endl;
+    cout << "\nTotal diagrams: " << diagrs.size();
+    if(n_singlets > 0)
+        cout << " (singlets: " << n_singlets << ")";
+    cout << endl;
     
     return 0;
 }
