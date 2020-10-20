@@ -3,9 +3,10 @@ FODGE: Flavour-Ordered Diagram Generator
 
 Generates flavour-ordered diagrams in the NLSM.
 Old version used in my master's thesis, new version
-used in upcoming article arXiv:1909.XXXXX by 
-J. Bijnens, K. Kampf and me. Inspired by earlier work 
-by J. Bijnens.
+used in the article "Higher-order Tree-level Amplitudes
+in the Nonlinear Sigma Model", JHEP 11 (2019) 074,
+arXiv:1909.13684 by J. Bijnens, K. Kampf and me. 
+Inspired by earlier work by J. Bijnens.
 
 To install, place all files and directories
 in a directory of your choice, and run "cmake ."
